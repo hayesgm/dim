@@ -52,9 +52,8 @@ export class Interceptor {
     newIntersections.forEach(({object}) => {
       let undo = () => {};
       if (object instanceof Mesh) {
-        let oldColor = object.material.color;
         undo = () => {
-          object.material.color.set(oldColor);
+          object.material.color.set('white');
         };
         object.material.color.set('red');
       }

@@ -13,8 +13,8 @@
     "three": "^0.137.5"
   },
   "scripts": {
-    "dev": "cp -r public/* dist && esbuild src/main.ts --bundle --sourcemap --servedir=dist --outfile=dist/dim.js",
-    "build": "cp -r public/* dist && esbuild src/main.ts --bundle --minify --sourcemap --outfile=dist/dim.js",
+    "dev": "cp -rp public/* dist && esbuild src/main.ts --bundle --sourcemap --servedir=dist --outfile=dist/dim.js",
+    "build": "cp -rp public/* dist && esbuild src/main.ts --bundle --minify --sourcemap --outfile=dist/dim.js",
     "deploy": "aws s3 sync --exclude .DS_Store dist s3://dimlit.space"
   },
   "prettier": {
