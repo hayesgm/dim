@@ -38,8 +38,8 @@ export class World {
     let controllerGrip0 = buildControllerGrip(this.renderer, 0);
     let controllerGrip1 = buildControllerGrip(this.renderer, 1);
 
-    buildController(this.renderer, 0, this.scene);
-    buildController(this.renderer, 1, this.scene);
+    buildController(this.renderer, 0, controllerGrip0);
+    buildController(this.renderer, 1, controllerGrip1);
 
     const meshGroup = new Group(); // createMeshGroup();
     const { ambientLight, mainLight } = createLights();

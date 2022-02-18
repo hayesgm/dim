@@ -62,7 +62,7 @@ export function buildControllerGrip(
 export function buildController(
   renderer: WebGLRenderer,
   index: number,
-  scene: Scene
+  group: Group
 ) {
   let controller = renderer.xr.getController(index);
   // controller.addEventListener('selectstart', onSelectStart);
@@ -70,6 +70,6 @@ export function buildController(
   controller.addEventListener("connected", function (event) {
     let tracker = getTrackingObject(event.data);
     console.log({tracker});
-    scene.add(tracker);
+    group.add(tracker);
   });
 }
