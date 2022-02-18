@@ -1,16 +1,18 @@
 import { Clock, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 
 export interface Updatable {
-  tick: () => void;
+  tick: (delta: number) => void;
 }
 
 export class Loop {
+  private clock: Clock;
   camera: PerspectiveCamera;
   scene: Scene;
   renderer: WebGLRenderer;
   updatables: Updatable[];
 
   constructor(camera: PerspectiveCamera, scene: Scene, renderer: WebGLRenderer) {
+    this.clock = new Clock();
     this.camera = camera;
     this.scene = scene;
     this.renderer = renderer;
@@ -29,8 +31,10 @@ export class Loop {
   }
 
   tick() {
+    const delta = this.clock.getDelta();
+
     for (let updatable of this.updatables) {
-      updatable.tick();
+      updatable.tick(delta);
     }
   }
 }

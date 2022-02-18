@@ -13,4 +13,6 @@ async function main(selector: string) {
   world.start();
 }
 
-main('#three');
+main('#three').catch((err) => {
+  console.error(err);
+});
