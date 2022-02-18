@@ -4,7 +4,6 @@ import {
   WebGLRenderer,
 } from "three";
 import { loadSceneGeometry } from "./scene";
-import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
 
 let width = window.innerWidth;
 let height = window.innerHeight;

@@ -10,6 +10,7 @@ import {
 import { loadModel } from "./model";
 import { ambientLight } from "./light";
 import { DirectionalLight, HemisphereLight } from "three";
+import { buildController, buildControllerGrip } from "./control";
 
 export async function loadSceneGeometry(
   scene: Scene,
@@ -17,7 +18,7 @@ export async function loadSceneGeometry(
   renderer: WebGLRenderer
 ) {
   const geometry = new BoxGeometry();
-  const material = new MeshBasicMaterial({ color: 0x00ff00 });
+  const material = new MeshBasicMaterial({ color: 0xff0000 });
   const cube = new Mesh(geometry, material);
   cube.position.z = -10;
   cube.position.y = 5;
@@ -34,11 +35,17 @@ export async function loadSceneGeometry(
   camera.position.z = 5;
   camera.position.y = 0;
 
-  let sub = await loadModel("models/submarine/scene.gltf", {
-    position: [0, 0, -10],
-    scale: 0.005,
-  });
+  
   scene.add(sub);
+
+  let controllerGrip0 = buildControllerGrip(renderer, 0);
+  let controllerGrip1 = buildControllerGrip(renderer, 1);
+
+  scene.add(controllerGrip0);
+  scene.add(controllerGrip1);
+
+  buildController(renderer, 0, scene);
+  buildController(renderer, 1, scene);
 
   renderer.setAnimationLoop(() => {
     cube.rotation.x += 0.01;
