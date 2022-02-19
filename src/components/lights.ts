@@ -4,11 +4,12 @@ export function createLights(): { ambientLight: HemisphereLight, mainLight: Dire
   const ambientLight = new HemisphereLight(
     'white', // bright sky color
     'darkslategrey', // dim ground color
-    5, // intensity
+    2, // intensity
   );
 
-  const mainLight = new DirectionalLight('white', 8);
+  const mainLight = new DirectionalLight('gray', 8);
   mainLight.position.set(10, 10, 10);
+  mainLight.target.position.set(7.5, 0, -5);
 
   return { ambientLight, mainLight };
 }

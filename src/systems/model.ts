@@ -1,5 +1,5 @@
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { Group, Scene } from "three";
+import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { AnimationMixer, Box3, Group, Object3D, Vector3, Scene } from "three";
 
 const loader = new GLTFLoader();
 
@@ -10,28 +10,46 @@ function uniformVec3(x: number): Vec3 {
 }
 
 interface LoadOpts {
-  position?: Vec3;
   scale?: number | Vec3;
+  size?: number;
 }
 
-export function loadModel(path: string, opts: LoadOpts = {}): Promise<Group> {
-  return new Promise((resolve, reject) => {
-    loader.load(
-      path,
-      function (gltf) {
-        if (opts.position) {
-          gltf.scene.position.set(...opts.position);
-        }
-        if (opts.scale) {
-          let scale = typeof opts.scale === "number" ? uniformVec3(opts.scale) : opts.scale;
-          gltf.scene.scale.set(...scale);
-        }
-        resolve(gltf.scene);
-      },
-      function (xhr) {},
-      function (error) {
-        reject(error);
-      }
-    );
-  });
+export async function loadModel(path: string, opts: LoadOpts = {}): Promise<Object3D> {
+  let data: GLTF = await loader.loadAsync(path);
+  const model = data.scene.children[0];
+  if (opts.size) {
+    let bounds = new Box3().setFromObject(model);
+    let size = bounds.getSize(new Vector3());
+    let maxAxis = Math.max(size.x, size.y, size.z);
+    console.log('sz', opts.size, size, maxAxis, 1.0/maxAxis);
+    opts.scale = opts.size * 1.0 / maxAxis;
+  }
+  if (opts.scale) {
+    let scale = typeof opts.scale === "number" ? uniformVec3(opts.scale) : opts.scale;
+    model.scale.set(...scale);
+  }
+  console.log(opts.scale);
+  return model;
+}
+
+export async function loadAnimatedModel(path: string, opts: LoadOpts = {}): Promise<[Object3D, AnimationMixer]> {
+  let data: GLTF = await loader.loadAsync(path);
+  const model = data.scene.children[0];
+  if (opts.size) {
+    let bounds = new Box3().setFromObject(model);
+    let size = bounds.getSize(new Vector3());
+    let maxAxis = Math.max(size.x, size.y, size.z);
+    opts.scale = 1.0 / maxAxis;
+  }
+  if (opts.scale) {
+    let scale = typeof opts.scale === "number" ? uniformVec3(opts.scale) : opts.scale;
+    model.scale.set(...scale);
+  }
+  const clip = data.animations[0];
+
+  const mixer = new AnimationMixer(model);
+  const action = mixer.clipAction(clip);
+  action.play();
+
+  return [model, mixer];
 }

@@ -5,11 +5,13 @@ import {
   Group,
   Line,
   LineBasicMaterial,
+  Matrix4,
   Mesh,
   MeshBasicMaterial,
   Object3D,
   RingGeometry,
   Scene,
+  Vector3,
   WebGLRenderer,
 } from 'three';
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
@@ -39,17 +41,27 @@ function getTrackingObject(source: XRInputSource, material: LineBasicMaterial): 
   }
 }
 
+export interface TriggerEvent {
+  id: string,
+  event: 'selectstart' | 'selectend'
+  orientation: {
+    origin: Vector3,
+    direction: Vector3
+  }
+};
+
 export class Controller {
-  name: string;
+  id: string;
   controller: Group;
   grip: Group;
   tracker: Line | undefined;
   selecting: boolean;
   offMaterial: LineBasicMaterial;
   onMaterial: LineBasicMaterial;
+  triggerHandler: (event: TriggerEvent) => void
 
-  constructor(name: string, index: number, renderer: WebGLRenderer, onColor: string) {
-    this.name = name;
+  constructor(id: string, index: number, renderer: WebGLRenderer, onColor: string, triggerHandler: (event: TriggerEvent) => void) {
+    this.id = id;
 
     this.offMaterial = new LineBasicMaterial({
       vertexColors: true,
@@ -76,11 +88,25 @@ export class Controller {
     this.grip = renderer.xr.getControllerGrip(index);
     this.grip.add(controllerModelFactory.createControllerModel(this.grip));
 
+    this.triggerHandler = triggerHandler;
+
     this.selecting = false;
   }
 
+  getOrientation(): { origin: Vector3, direction: Vector3 } {
+    let tempMatrix = new Matrix4();
+    tempMatrix.identity().extractRotation(this.controller.matrixWorld);
+    let origin = new Vector3();
+
+    origin.setFromMatrixPosition(this.controller.matrixWorld);
+    let direction = new Vector3(0, 0, -1).applyMatrix4(tempMatrix).normalize();
+
+    return { origin, direction }
+  }
+
   onSelectStart() {
-    console.log('sel start', this.name, this.selecting, this.tracker);
+    console.log('sel start', this.id, this.selecting, this.tracker);
+    this.triggerHandler({ id: this.id, orientation: this.getOrientation(), event: 'selectstart' });
     this.selecting = true;
     if (this.tracker) {
       this.tracker.material = this.onMaterial;
@@ -88,7 +114,8 @@ export class Controller {
   }
 
   onSelectEnd() {
-    console.log('sel end', this.name, this.selecting, this.tracker);
+    console.log('sel end', this.id, this.selecting, this.tracker);
+    this.triggerHandler({ id: this.id, orientation: this.getOrientation(), event: 'selectend' });
     this.selecting = false;
     if (this.tracker) {
       this.tracker.material = this.offMaterial;

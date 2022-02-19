@@ -1,16 +1,18 @@
-import { World } from './World';
+import { Stage } from './Stage';
+import { init } from '@dimforge/rapier3d-compat';
 
 async function main(selector: string) {
+  await init();
   const container = document.querySelector(selector);
 
   if (!container) {
     throw new Error(`Failed to find container: ${selector}`);
   }
 
-  const world = new World(container);
+  const stage = new Stage(container);
 
-  await world.load();
-  world.start();
+  await stage.load();
+  stage.start();
 }
 
 main('#three').catch((err) => {
