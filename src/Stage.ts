@@ -30,6 +30,7 @@ import { Physics } from './Physics';
 
 export class Stage {
   private container: Element;
+  private cameraGroup: Group;
   private camera: PerspectiveCamera;
   private scene: Scene;
   private renderer: WebGLRenderer;
@@ -40,7 +41,9 @@ export class Stage {
 
   constructor(container: Element) {
     this.container = container;
-    this.camera = createCamera();
+    let { cameraGroup, camera } = createCamera();
+    this.cameraGroup = cameraGroup;
+    this.camera = camera;
     this.scene = createScene();
     this.renderer = createRenderer();
     this.loop = new Loop(this.camera, this.scene, this.renderer);
@@ -66,12 +69,14 @@ export class Stage {
       1,
       this.renderer,
       'darkslateblue',
+      this.handleTrigger
     );
     let controllerRight = new Controller(
       'right',
       0,
       this.renderer,
-      'firebrick'
+      'firebrick',
+      this.handleTrigger
     );
     this.rose = getRose();
     this.rose.visible = false;
@@ -131,7 +136,7 @@ export class Stage {
       this.physics
     ); // TODO
 
-    this.scene.add(ambientLight, mainLight, this.rose);
+    this.scene.add(ambientLight, mainLight, this.rose, ...controllerLeft.sceneObjects(), ...controllerRight.sceneObjects());
   }
 
   start() {
