@@ -14,6 +14,8 @@ import { Resizer } from './systems/Resizer';
 
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
+import { Physics } from './Physics';
+
 export class World {
   private container: Element;
   private camera: PerspectiveCamera;
@@ -36,6 +38,8 @@ export class World {
   }
 
   async load() {
+    let physics = await Physics.boot();
+    console.log({physics});
     let controllerLeft = new Controller('left', 1, this.renderer, 'darkslateblue');
     let controllerRight = new Controller('right', 0, this.renderer, 'firebrick');
 
