@@ -1,5 +1,5 @@
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { AnimationMixer, Box3, Group, Object3D, Vector3, Scene } from "three";
+import { AnimationClip, AnimationMixer, Box3, Group, Object3D, Vector3, Scene } from "three";
 
 const loader = new GLTFLoader();
 
@@ -12,6 +12,7 @@ function uniformVec3(x: number): Vec3 {
 interface LoadOpts {
   scale?: number | Vec3;
   size?: number;
+  animation?: number;
 }
 
 export async function loadModel(path: string, opts: LoadOpts = {}): Promise<Object3D> {
@@ -32,7 +33,7 @@ export async function loadModel(path: string, opts: LoadOpts = {}): Promise<Obje
   return model;
 }
 
-export async function loadAnimatedModel(path: string, opts: LoadOpts = {}): Promise<[Object3D, AnimationMixer]> {
+export async function loadAnimatedModel(path: string, opts: LoadOpts = {}): Promise<{model: Object3D, animations: AnimationClip[], mixer: AnimationMixer}> {
   let data: GLTF = await loader.loadAsync(path);
   const model = data.scene.children[0];
   if (opts.size) {
@@ -45,11 +46,12 @@ export async function loadAnimatedModel(path: string, opts: LoadOpts = {}): Prom
     let scale = typeof opts.scale === "number" ? uniformVec3(opts.scale) : opts.scale;
     model.scale.set(...scale);
   }
-  const clip = data.animations[0];
+  let animations = data.animations;
+  const clip = data.animations[opts.animation ?? 0];
 
   const mixer = new AnimationMixer(model);
   const action = mixer.clipAction(clip);
   action.play();
 
-  return [model, mixer];
+  return {model, animations, mixer};
 }

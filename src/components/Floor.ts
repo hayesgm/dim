@@ -12,7 +12,7 @@ export class Floor extends Entity {
     colliderDesc: ColliderDesc,
     physics: Physics,
   ) {
-    super('floor', [object], rigidBodyDesc, colliderDesc, physics);
+    super('floor', [object], rigidBodyDesc, colliderDesc, false, physics);
   }
 
   static async load(size: Vector3, position: Vector3, physics: Physics) {

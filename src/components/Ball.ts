@@ -15,7 +15,7 @@ export class Ball extends Entity {
     colliderDesc: ColliderDesc,
     physics: Physics
   ) {
-    super('ball', [object], rigidBodyDesc, colliderDesc, physics);
+    super('ball', [object], rigidBodyDesc, colliderDesc, false, physics);
   }
 
   static async load(size: number, position: Vector3, physics: Physics) {
@@ -37,16 +37,5 @@ export class Ball extends Entity {
 
   tick(delta: number) {
     super.tick(delta);
-  }
-
-  tossUp(power: number = 0.5) {
-    this.toss(new Vector3(0, 1, 0), power);
-  }
-
-  toss(dir: Vector3, power: number) {
-    this.rigidBody?.applyForce(
-      dir.normalize().multiplyScalar(power * 20),
-      true
-    );
   }
 }

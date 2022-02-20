@@ -4,6 +4,7 @@ import { loadAnimatedModel } from '../systems/model';
 import {
   RigidBodyDesc,
   ColliderDesc,
+  CoefficientCombineRule,
 } from '@dimforge/rapier3d-compat';
 import { Entity } from '../Entity';
 
@@ -21,14 +22,14 @@ export class Bird extends Entity {
     colliderDesc: ColliderDesc,
     physics: Physics,
   ) {
-    super(id, [object], rigidBodyDesc, colliderDesc, physics);
+    super(id, [object], rigidBodyDesc, colliderDesc, false, physics);
     this.mixer = mixer;
     this.flightLevel = flightLevel;
     this.deviation = 0;
   }
 
   static async load(model: string, position: Vector3, physics: Physics) {
-    let [object, mixer] = await loadAnimatedModel(
+    let {model: object, mixer} = await loadAnimatedModel(
       `assets/models/${model}.glb`,
       { scale: 0.002 }
     );

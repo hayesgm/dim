@@ -1,0 +1,11 @@
+Model Information:
+* title:	Dog - Corgi
+* source:	https://sketchfab.com/3d-models/dog-corgi-24426dbc61ef42168224e5453c33160a
+* author:	billl90 (https://sketchfab.com/billl90)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Dog - Corgi" (https://sketchfab.com/3d-models/dog-corgi-24426dbc61ef42168224e5453c33160a) by billl90 (https://sketchfab.com/billl90) licensed under SKETCHFAB Standard (https://sketchfab.com/licenses)

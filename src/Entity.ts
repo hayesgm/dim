@@ -1,6 +1,7 @@
-import { Group, Object3D, Event, Vector3 } from 'three';
+import { Box3, Group, Object3D, Event, Vector2, Vector3 } from 'three';
 import { MathUtils } from 'three';
 import { getColliderObject } from './systems/colliderObject';
+import { Panel } from './components/Panel';
 import { Physics } from './Physics';
 import {
   Collider,
@@ -22,12 +23,16 @@ export class Entity {
   collider: Collider;
   debugging: boolean;
   trackEntity: Entity | null;
+  debugPanel: Panel;
+  initialBoundingBox: Box3;
+  animated: boolean;
 
   constructor(
     id: string,
     objects: Object3D<Event>[],
     rigidBodyDesc: RigidBodyDesc,
     colliderDesc: ColliderDesc,
+    animated: boolean,
     physics: Physics,
   ) {
     this.uuid = MathUtils.generateUUID();
@@ -38,21 +43,40 @@ export class Entity {
     for (let object of objects) {
       this.group.add(object);
     }
+    let initialBoundingBox = new Box3();
+    initialBoundingBox.setFromObject(this.group, true);
+    this.initialBoundingBox = initialBoundingBox;
     this.rigidBodyDesc = rigidBodyDesc;
     this.colliderDesc = colliderDesc;
-    this.colliderObject = getColliderObject(this.colliderDesc);
+    let { geometry, line } = getColliderObject(this.colliderDesc);
+    this.colliderObject = line;
     let { rigidBody, collider } = physics.track(this);
     this.rigidBody = rigidBody;
     this.collider = collider;
     this.debugging = false;
     this.trackEntity = null;
+    geometry.computeBoundingBox();
+    let colliderBoundingBox = geometry.boundingBox!;
+    let width = colliderBoundingBox.max.x - colliderBoundingBox.min.x;
+    this.debugPanel = new Panel(new Vector2(0.2, 0.3), new Vector3(colliderBoundingBox.max.x + width * 1.2, colliderBoundingBox.max.y, colliderBoundingBox.min.z));    
+    this.animated = animated;
   }
 
-  debug() {
+  debug(message: string) {
+    this.debugPanel.appendText(message);
+  }
+
+  toggleDebug() {
+    this.debugging = !this.debugging;
+
+    if (this.debugging) {
+      this.group.add(...this.debugPanel.sceneObjects());
+    } else {
+      this.group.remove(...this.debugPanel.sceneObjects());
+    }
     console.log(this);
     console.log("Entity stored in 'entity' var...");
     (window as any).entity = this;
-    this.debugging = !this.debugging;
     this.showCollider(this.debugging);
   }
 
@@ -79,6 +103,21 @@ export class Entity {
     if (this.trackEntity) {
       this.rigidBody.sleep();
       this.rigidBody.setTranslation(this.trackEntity.position(), false);
+    }
+
+    if (this.animated) {
+      let boundingBox = new Box3();
+      boundingBox.setFromObject(this.group, true);
+
+      let initMin = this.initialBoundingBox.min.clone();
+      initMin.applyMatrix4(this.group.matrixWorld)
+
+      let translation = boundingBox.min.clone().sub(initMin);
+      let initialTranslation = this.colliderDesc.translation;
+      let initialTranslationVec3 = new Vector3(initialTranslation.x, initialTranslation.y, initialTranslation.z)
+      let final = initialTranslationVec3.clone().add(translation);
+      this.collider.setTranslationWrtParent(final);
+      this.colliderObject.position.set(translation.x, translation.y, translation.z);
     }
 
     let position = this.position();

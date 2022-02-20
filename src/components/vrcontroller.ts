@@ -100,7 +100,7 @@ export class VRController extends Entity {
         bodyPosition.z
       );
     let colliderDesc = ColliderDesc.ball(0.1).setCollisionGroups(0);
-    super(id, [], rigidBodyDesc, colliderDesc, physics);
+    super(id, [], rigidBodyDesc, colliderDesc, false, physics);
 
     let controller = renderer.xr.getController(index);
     let vrcontroller = this;

@@ -27,6 +27,7 @@ import { Panel } from './components/Panel';
 import { Ball } from './components/Ball';
 import { Bird } from './components/Bird';
 import { Floor } from './components/Floor';
+import { Puppy } from './components/Puppy';
 import { Physics } from './Physics';
 import { Entity } from './Entity';
 import { buildNumber } from './systems/build';
@@ -81,8 +82,10 @@ export class Stage {
     let targets: Object3D<Event>[] = [];
     let targeted = false;
 
+    let ball = await Ball.load(0.07, new Vector3(0.75, 0, -0.5), this.physics);
     let entities = await Promise.all([
       Bird.load('Parrot', new Vector3(0, 0, 0.25), this.physics),
+      ball,
       new VRController(
         'lcontroller',
         1,
@@ -108,7 +111,7 @@ export class Stage {
         new Vector3(0, -0.5, 0),
         this.physics
       ),
-      Ball.load(0.07, new Vector3(0.75, 0, -0.5), this.physics),
+      Puppy.load(ball, new Vector3(0.25, 0, -0.5), this.physics),
     ]);
     for (let entity of entities) {
       if (entity) {
@@ -165,7 +168,7 @@ export class Stage {
       ...this.getRayFromCamera(new Vector2(x, y))
     );
     if (entity) {
-      entity.debug();
+      entity.toggleDebug();
     }
   }
 
@@ -197,7 +200,7 @@ export class Stage {
         orientation.direction
       );
       if (entity) {
-        entity.debug();
+        entity.toggleDebug();
       }
     }
   }
