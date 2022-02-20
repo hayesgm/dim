@@ -143,11 +143,11 @@ export class VRController extends Entity {
     this.positionsTime[pi % positionCount] = (this.positionsTime[(positionCount + pi - 1) % positionCount] ?? 0) + delta;
     this.positionsIndex++;
 
-    if (i++ % 100 === 0) {
-      this.stage.debug("Velocity: " + JSON.stringify(this.getAverageVelocity().toArray()));
-      let otherVel = this.rigidBody.linvel();
-      this.stage.debug(`Other Velocity: ${otherVel.x}, ${otherVel.y}, ${otherVel.z}`);
-    }
+    // if (i++ % 100 === 0) {
+    //   this.stage.debug("Velocity: " + JSON.stringify(this.getAverageVelocity().toArray()));
+    //   let otherVel = this.rigidBody.linvel();
+    //   this.stage.debug(`Other Velocity: ${otherVel.x}, ${otherVel.y}, ${otherVel.z}`);
+    // }
   }
 
   getOrientation(): { origin: Vector3; direction: Vector3 } {

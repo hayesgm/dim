@@ -182,7 +182,11 @@ export class Stage {
       }
     } else if (event === 'squeezeend' && id === 'rcontroller') {
       let ball = this.entities.get('ball')!;
+      let rcontroller = this.entities.get('rcontroller')!;
       if (ball) {
+        let velocity = (rcontroller as VRController).getAverageVelocity();
+        this.debug("Velocity: " + JSON.stringify(velocity.toArray()));
+        ball.rigidBody.applyImpulse(velocity, true)
         ball.track(null);
       }
     } else if (event === 'selectstart' && id === 'rcontroller') {
