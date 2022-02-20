@@ -23,10 +23,13 @@ import { getRose } from './systems/rose';
 
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
+import { Panel } from './components/Panel';
 import { Ball } from './components/Ball';
 import { Bird } from './components/Bird';
 import { Floor } from './components/Floor';
 import { Physics } from './Physics';
+
+let i = 0;
 
 export class Stage {
   private container: Element;
@@ -37,7 +40,8 @@ export class Stage {
   private loop: Loop;
   private controls: OrbitControls;
   private physics: Physics;
-  private rose: Object3D | undefined;
+  private rose: Object3D;
+  private debugPanel: Panel;
 
   constructor(container: Element) {
     this.container = container;
@@ -49,6 +53,9 @@ export class Stage {
     this.loop = new Loop(this.camera, this.scene, this.renderer);
     this.controls = createControls(this.camera, this.renderer.domElement);
     this.physics = new Physics();
+    this.debugPanel = new Panel(new Vector2(1000, 300), new Vector3(-0.5, 0.3, -1), 1);
+    this.rose = getRose();
+    this.rose.visible = false;
     container.append(this.renderer.domElement);
     container.appendChild(VRButton.createButton(this.renderer));
 
@@ -61,6 +68,9 @@ export class Stage {
     window.addEventListener('keypress', (event) =>
       this.handleKeycode(event.code)
     );
+
+    this.debug("test1");
+    this.debug("test2");
   }
 
   async load() {
@@ -78,8 +88,6 @@ export class Stage {
       'firebrick',
       this.handleTrigger
     );
-    this.rose = getRose();
-    this.rose.visible = false;
 
     const { ambientLight, mainLight } = createLights();
     let targets: Object3D<Event>[] = [];
@@ -130,13 +138,16 @@ export class Stage {
     );
 
     this.loop.updatables.push(
+      this,
       this.controls as any,
       interceptor0,
       interceptor1,
       this.physics
     ); // TODO
 
-    this.scene.add(ambientLight, mainLight, this.rose, ...controllerLeft.sceneObjects(), ...controllerRight.sceneObjects());
+    this.cameraGroup.add(...controllerLeft.sceneObjects(), ...controllerRight.sceneObjects());
+
+    this.scene.add(ambientLight, mainLight, this.rose, this.cameraGroup, ...this.debugPanel.sceneObjects());
   }
 
   start() {
@@ -147,7 +158,16 @@ export class Stage {
     this.loop.stop();
   }
 
+  tick() {
+    // Nothing
+  }
+
+  debug(message: string) {
+    this.debugPanel.appendText("Debug: " + message);
+  }
+
   handlePointer(container: Element, cx: number, cy: number) {
+    this.debug("Click");
     // calculate pointer position in normalized device coordinates
     // (-1 to +1) for both components
     let el = this.renderer.domElement;
@@ -162,6 +182,7 @@ export class Stage {
   }
 
   handleTrigger({id, event, orientation}: TriggerEvent) {
+    this.debug("Trigger " + id);
     let entity = this.physics.castRay(
       orientation.origin,
       orientation.direction

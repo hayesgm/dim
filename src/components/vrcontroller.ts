@@ -75,10 +75,10 @@ export class Controller {
     });
 
     let controller = renderer.xr.getController(index);
-    let controllerObject = this;
+    let vrcontroller = this;
     controller.addEventListener('connected', function (event) {
-      let tracker = getTrackingObject(event.data, controllerObject.offMaterial);
-      controllerObject.tracker = tracker;
+      let tracker = getTrackingObject(event.data, vrcontroller.offMaterial);
+      vrcontroller.tracker = tracker;
       controller.add(tracker);
     });
     controller.addEventListener('selectstart', this.onSelectStart.bind(this));
