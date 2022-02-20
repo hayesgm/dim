@@ -29,8 +29,7 @@ import { Bird } from './components/Bird';
 import { Floor } from './components/Floor';
 import { Physics } from './Physics';
 import { Entity } from './Entity';
-
-const buildNumber = 1;
+import { buildNumber } from './systems/build';
 
 export class Stage {
   private container: Element;
@@ -60,7 +59,7 @@ export class Stage {
       new Vector3(-0.5, 0.6, -0.5),
       1
     );
-    this.debug("Build " + buildNumber);
+    this.debug('Build ' + buildNumber);
     this.rose = getRose();
     this.rose.visible = false;
     this.entities = new Map();
@@ -171,28 +170,29 @@ export class Stage {
   }
 
   handleTrigger({ id, event, orientation }: TriggerEvent) {
-    if (event === 'selectstart') {
-      if (id === 'lcontroller') {
-        this.toggleDebugPanel();
-
-        let entity = this.physics.castRay(
-          orientation.origin,
-          orientation.direction
-        );
-        if (entity) {
-          entity.debug();
-        }
+    if (event === 'squeezestart' && id === 'lcontroller') {
+      this.toggleDebugPanel();
+    } else if (event === 'selectstart' && id === 'lcontroller') {
+      this.physics.toggleColliders();
+    } else if (event === 'squeezestart' && id === 'rcontroller') {
+      let ball = this.entities.get('ball')!;
+      let rcontroller = this.entities.get('rcontroller')!;
+      console.log({ ball, rcontroller });
+      if (ball) {
+        ball.track(rcontroller);
       }
-
-      if (id === 'rcontroller') {
-        this.physics.toggleColliders();
-
-        let ball = this.entities.get('ball')!;
-        let rcontroller = this.entities.get('rcontroller')!;
-        console.log({ ball, rcontroller });
-        if (ball) {
-          ball.track(rcontroller);
-        }
+    } else if (event === 'squeezeend' && id === 'rcontroller') {
+      let ball = this.entities.get('ball')!;
+      if (ball) {
+        ball.track(null);
+      }
+    } else if (event === 'selectstart' && id === 'rcontroller') {
+      let entity = this.physics.castRay(
+        orientation.origin,
+        orientation.direction
+      );
+      if (entity) {
+        entity.debug();
       }
     }
   }

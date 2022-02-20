@@ -21,7 +21,7 @@ export class Entity {
   rigidBody: RigidBody;
   collider: Collider;
   debugging: boolean;
-  trackEntity: Entity | undefined;
+  trackEntity: Entity | null;
 
   constructor(
     id: string,
@@ -45,6 +45,7 @@ export class Entity {
     this.rigidBody = rigidBody;
     this.collider = collider;
     this.debugging = false;
+    this.trackEntity = null;
   }
 
   debug() {
@@ -70,17 +71,17 @@ export class Entity {
     return new Vector3(transaction.x, transaction.y, transaction.z);
   }
 
-  track(entity: Entity) {
+  track(entity: Entity | null) {
     this.trackEntity = entity;
   }
 
   tick(delta: number) {
     if (this.trackEntity) {
-      // TODO:
-    } else {
-      let position = this.position();
-      this.group.position.set(position.x, position.y, position.z);
+      this.rigidBody.setTranslation(this.trackEntity.position(), true);
     }
+
+    let position = this.position();
+    this.group.position.set(position.x, position.y, position.z);
   }
 
   sceneObjects(): Object3D<Event>[] {

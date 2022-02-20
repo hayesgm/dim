@@ -53,20 +53,29 @@ function getPointerObject(source: XRInputSource): Line {
 
 export interface TriggerEvent {
   id: string;
-  event: 'selectstart' | 'selectend';
+  event: 'selectstart' | 'selectend' | 'squeezestart' | 'squeezeend';
   orientation: {
     origin: Vector3;
     direction: Vector3;
   };
 }
 
+const positionCount = 10;
+let i = 0;
+
 export class VRController extends Entity {
   controller: Group;
   grip: Group;
   viewGroup: Group;
+  gamepad: Gamepad | undefined;
   tracker: Object3D<Event> | undefined;
   triggerHandler: (event: TriggerEvent) => void;
   stage: Stage;
+  positionsX: Float32Array;
+  positionsY: Float32Array;
+  positionsZ: Float32Array;
+  positionsTime: Float32Array;
+  positionsIndex: number;
 
   constructor(
     id: string,
@@ -89,7 +98,7 @@ export class VRController extends Entity {
         bodyPosition.y,
         bodyPosition.z
       );
-    let colliderDesc = ColliderDesc.ball(0.1).setDensity(0.5);
+    let colliderDesc = ColliderDesc.ball(0.1).setDensity(0.5).setCollisionGroups(0);
     super(id, [], rigidBodyDesc, colliderDesc, physics);
 
     let controller = renderer.xr.getController(index);
@@ -98,9 +107,12 @@ export class VRController extends Entity {
       let tracker = getPointerObject(event.data);
       vrcontroller.tracker = tracker;
       controller.add(tracker);
+      vrcontroller.gamepad = event.data.gamepad;
     });
     controller.addEventListener('selectstart', this.onSelectStart.bind(this));
     controller.addEventListener('selectend', this.onSelectEnd.bind(this));
+    controller.addEventListener('squeezestart', this.onSqueezeStart.bind(this));
+    controller.addEventListener('squeezeend', this.onSqueezeEnd.bind(this));
     this.controller = controller;
 
     viewGroup.add(controller);
@@ -110,14 +122,30 @@ export class VRController extends Entity {
     this.grip = grip;
     this.triggerHandler = triggerHandler;
     this.stage = stage;
+
+    this.positionsX = new Float32Array(positionCount);
+    this.positionsY = new Float32Array(positionCount);
+    this.positionsZ = new Float32Array(positionCount);
+    this.positionsTime = new Float32Array(positionCount);
+    this.positionsIndex = 10;
   }
 
   tick(delta: number) {
-    // super.tick(delta); // Don't do standard procedures
-    // let bodyPosition = new Vector3();
-    // this.grip.getWorldPosition(bodyPosition);
-    // // this.stage.debug(`x: ${bodyPosition.x}, y: ${bodyPosition.y}, z: ${bodyPosition.z}`)
-    // this.rigidBody.setTranslation(bodyPosition, true);
+    super.tick(delta); // Don't do standard procedures
+    let bodyPosition = new Vector3();
+    this.grip.getWorldPosition(bodyPosition);
+    this.rigidBody.setTranslation(bodyPosition, true);
+
+    let pi = this.positionsIndex;
+    this.positionsX[pi % positionCount] = bodyPosition.x;
+    this.positionsY[pi % positionCount] = bodyPosition.y;
+    this.positionsZ[pi % positionCount] = bodyPosition.z;
+    this.positionsTime[pi % positionCount] = (this.positionsTime[(positionCount + pi - 1) % positionCount] ?? 0) + delta;
+    this.positionsIndex++;
+
+    if (i++ % 100 === 0) {
+      return this.stage.debug("Velocity: " + JSON.stringify(this.getAverageVelocity().toArray()));
+    }
   }
 
   getOrientation(): { origin: Vector3; direction: Vector3 } {
@@ -145,5 +173,36 @@ export class VRController extends Entity {
       orientation: this.getOrientation(),
       event: 'selectend',
     });
+  }
+
+  onSqueezeStart() {
+    this.triggerHandler({
+      id: this.id,
+      orientation: this.getOrientation(),
+      event: 'squeezestart',
+    });
+  }
+
+  onSqueezeEnd() {
+    this.triggerHandler({
+      id: this.id,
+      orientation: this.getOrientation(),
+      event: 'squeezeend',
+    });
+  }
+
+  getAverageVelocity(): Vector3 {
+    let pi = this.positionsIndex - 1;
+    let deltaX = (this.positionsX[pi % positionCount] ?? 0) - (this.positionsX[(positionCount + pi - 1) % positionCount] ?? 0);
+    let deltaY = (this.positionsY[pi % positionCount] ?? 0) - (this.positionsY[(positionCount + pi - 1) % positionCount] ?? 0);
+    let deltaZ = (this.positionsZ[pi % positionCount] ?? 0) - (this.positionsZ[(positionCount + pi - 1) % positionCount] ?? 0);
+    let deltaTime = (this.positionsTime[pi % positionCount] ?? 0) - (this.positionsTime[(positionCount + pi - 1) % positionCount] ?? 0);
+
+    // console.log({deltaX, deltaY, deltaZ, deltaTime, pi, pt: this.positionsTime, px: this.positionsX, ax: this.positionsX[pi % positionCount], bx: this.positionsX[(positionCount + pi - 1) % positionCount]})
+    if (deltaTime === 0) {
+      return new Vector3(0, 0, 0);
+    } else {
+      return new Vector3(deltaX, deltaY, deltaZ).multiplyScalar(1 / deltaTime);
+    }
   }
 }
