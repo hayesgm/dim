@@ -185,8 +185,12 @@ export class Stage {
       let rcontroller = this.entities.get('rcontroller')!;
       if (ball) {
         let velocity = (rcontroller as VRController).getAverageVelocity();
-        this.debug(`Velocity: x=${velocity.x.toFixed(3)},x=${velocity.y.toFixed(3)},x=${velocity.z.toFixed(3)}`);
-        ball.rigidBody.applyImpulse(velocity, true)
+        let mass = ball.rigidBody.mass();
+        this.debug(`Velocity: x=${velocity.x.toFixed(3)},y=${velocity.y.toFixed(3)},z=${velocity.z.toFixed(3)}`);
+        this.debug(`Mass: ${mass}`);
+        let impulse = velocity.multiplyScalar(mass);
+        this.debug(`Impulse: x=${impulse.x.toFixed(3)},y=${impulse.y.toFixed(3)},z=${impulse.z.toFixed(3)}`);
+        ball.rigidBody.applyImpulse(impulse, true)
         ball.track(null);
       }
     } else if (event === 'selectstart' && id === 'rcontroller') {
