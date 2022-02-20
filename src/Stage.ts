@@ -30,6 +30,8 @@ import { Floor } from './components/Floor';
 import { Physics } from './Physics';
 import { Entity } from './Entity';
 
+const buildNumber = 1;
+
 export class Stage {
   private container: Element;
   private cameraGroup: Group;
@@ -58,6 +60,7 @@ export class Stage {
       new Vector3(-0.5, 0.6, -0.5),
       1
     );
+    this.debug("Build " + buildNumber);
     this.rose = getRose();
     this.rose.visible = false;
     this.entities = new Map();
