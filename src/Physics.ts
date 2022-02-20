@@ -17,8 +17,6 @@ interface PhysicalEntity {
   collider: Collider;
 }
 
-const stepDelta = 0.003;
-
 export class Physics {
   world: World;
   entities: Map<string, PhysicalEntity>;
@@ -29,7 +27,6 @@ export class Physics {
   constructor() {
     let gravity = { x: 0.0, y: -9.81, z: 0.0 };
     this.world = new World(gravity);
-    this.world.timestep = stepDelta;
     this.entities = new Map();
     this.colliderIndex = new Map();
     this.lastStep = 0;
@@ -78,11 +75,8 @@ export class Physics {
   }
 
   tick(delta: number) {
-    this.lastStep = this.lastStep + delta;
-    if (this.lastStep > stepDelta) {
-      this.world.step();
-      this.lastStep = 0;
-    }
+    this.world.timestep = delta;
+    this.world.step();
   }
 
   toggleColliders() {

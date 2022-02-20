@@ -29,7 +29,7 @@ export class Ball extends Entity {
         position.x,
         position.y,
         position.z
-      ),
+      ).setCcdEnabled(true),
       ColliderDesc.ball(size * 0.5).setDensity(0.5),
       physics
     );

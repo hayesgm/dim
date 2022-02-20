@@ -138,6 +138,10 @@ export class VRController extends Entity {
     this.grip.getWorldPosition(bodyPosition);
     this.rigidBody.setTranslation(bodyPosition, true);
 
+    if (document.location.host === 'localhost:8000') {
+      bodyPosition = bodyPosition.add(new Vector3(Math.random() * 0.1, Math.random() * 0.1, 2 * Math.random() * 0.1));
+    }
+
     this.skippedTime += delta;
     // console.log("st", this.skippedTime, this.positionsIndex);
 

@@ -77,7 +77,8 @@ export class Entity {
 
   tick(delta: number) {
     if (this.trackEntity) {
-      this.rigidBody.setTranslation(this.trackEntity.position(), true);
+      this.rigidBody.sleep();
+      this.rigidBody.setTranslation(this.trackEntity.position(), false);
     }
 
     let position = this.position();

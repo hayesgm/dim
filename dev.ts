@@ -11,6 +11,6 @@ esbuild.serve(
     bundle: true,
     sourcemap: true,
     plugins: [wasmPlugin],
-    outfile: 'dist/dim.js'
+    outfile: 'dist/dim.js',
   }
 );
