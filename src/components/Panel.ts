@@ -32,7 +32,7 @@ export class Panel {
   private canvasHeight: number;
   private maxLines: number;
 
-  constructor(size: Vector2, position: Vector3, scale: number, maxLines: number = 30) {
+  constructor(size: Vector2, position: Vector3, maxLines: number = 30) {
     this.lines = [];
     this.maxLines = maxLines;
     this.canvas = document.createElement('canvas')!;
@@ -48,6 +48,7 @@ export class Panel {
     this.material = new MeshBasicMaterial({ map: this.texture, side: DoubleSide, opacity: 0.8, transparent: true });
     this.object = new Mesh(geometry, this.material);
     this.object.position.set(position.x, position.y, position.z);
+    this.visible_ = true;
     this.setVisibility(true);
     this.displayText();
   }

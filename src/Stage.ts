@@ -55,9 +55,8 @@ export class Stage {
     this.controls = createControls(this.camera, this.renderer.domElement);
     this.physics = new Physics();
     this.debugPanel = new Panel(
-      new Vector2(0.6, 0.6),
-      new Vector3(-0.5, 0.6, -0.5),
-      1
+      new Vector2(1.2, 1.2),
+      new Vector3(-0.5, 0.6, -0.5)
     );
     this.debug('Build ' + buildNumber);
     this.rose = getRose();

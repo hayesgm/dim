@@ -144,7 +144,9 @@ export class VRController extends Entity {
     this.positionsIndex++;
 
     if (i++ % 100 === 0) {
-      return this.stage.debug("Velocity: " + JSON.stringify(this.getAverageVelocity().toArray()));
+      this.stage.debug("Velocity: " + JSON.stringify(this.getAverageVelocity().toArray()));
+      let otherVel = this.rigidBody.linvel();
+      this.stage.debug(`Other Velocity: ${otherVel.x}, ${otherVel.y}, ${otherVel.z}`);
     }
   }
 
