@@ -185,7 +185,7 @@ export class Stage {
       let rcontroller = this.entities.get('rcontroller')!;
       if (ball) {
         let velocity = (rcontroller as VRController).getAverageVelocity();
-        this.debug("Velocity: " + JSON.stringify(velocity.toArray()));
+        this.debug(`Velocity: x=${velocity.x.toFixed(3)},x=${velocity.y.toFixed(3)},x=${velocity.z.toFixed(3)}`);
         ball.rigidBody.applyImpulse(velocity, true)
         ball.track(null);
       }
