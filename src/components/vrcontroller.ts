@@ -1,6 +1,10 @@
+import { Physics } from '../Physics';
+import { RigidBodyDesc, ColliderDesc } from '@dimforge/rapier3d-compat';
+import { Entity } from '../Entity';
 import {
   AdditiveBlending,
   BufferGeometry,
+  Event,
   Float32BufferAttribute,
   Group,
   Line,
@@ -16,14 +20,17 @@ import {
 } from 'three';
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
 import { XRInputSource } from 'webxr';
+import { Stage } from '../Stage';
 
 const controllerModelFactory = new XRControllerModelFactory();
 
-function getTrackingObject(
-  source: XRInputSource,
-  material: LineBasicMaterial
-): Line {
+function getPointerObject(source: XRInputSource): Line {
   let geometry;
+  let material = new LineBasicMaterial({
+    vertexColors: true,
+    blending: AdditiveBlending,
+    color: 'darkslateblue',
+  });
 
   switch (source.targetRayMode) {
     case 'tracked-pointer':
@@ -53,40 +60,42 @@ export interface TriggerEvent {
   };
 }
 
-export class VRController {
-  id: string;
+export class VRController extends Entity {
   controller: Group;
   grip: Group;
-  tracker: Line | undefined;
-  selecting: boolean;
-  offMaterial: LineBasicMaterial;
-  onMaterial: LineBasicMaterial;
+  viewGroup: Group;
+  tracker: Object3D<Event> | undefined;
   triggerHandler: (event: TriggerEvent) => void;
+  stage: Stage;
 
   constructor(
     id: string,
     index: number,
     renderer: WebGLRenderer,
-    onColor: string,
-    triggerHandler: (event: TriggerEvent) => void
+    triggerHandler: (event: TriggerEvent) => void,
+    viewGroup: Group,
+    physics: Physics,
+    stage: Stage,
   ) {
-    this.id = id;
-
-    this.offMaterial = new LineBasicMaterial({
-      vertexColors: true,
-      blending: AdditiveBlending,
-    });
-
-    this.onMaterial = new LineBasicMaterial({
-      vertexColors: true,
-      blending: AdditiveBlending,
-      color: onColor,
-    });
+    let grip = renderer.xr.getControllerGrip(index);
+    grip.add(controllerModelFactory.createControllerModel(grip));
+    console.log({grip});
+    viewGroup.add(grip);
+    let bodyPosition = new Vector3();
+    grip.getWorldPosition(bodyPosition);
+    let rigidBodyDesc =
+      RigidBodyDesc.newKinematicPositionBased().setTranslation(
+        bodyPosition.x,
+        bodyPosition.y,
+        bodyPosition.z
+      );
+    let colliderDesc = ColliderDesc.ball(0.1).setDensity(0.5);
+    super(id, [], rigidBodyDesc, colliderDesc, physics);
 
     let controller = renderer.xr.getController(index);
     let vrcontroller = this;
     controller.addEventListener('connected', function (event) {
-      let tracker = getTrackingObject(event.data, vrcontroller.offMaterial);
+      let tracker = getPointerObject(event.data);
       vrcontroller.tracker = tracker;
       controller.add(tracker);
     });
@@ -94,12 +103,21 @@ export class VRController {
     controller.addEventListener('selectend', this.onSelectEnd.bind(this));
     this.controller = controller;
 
-    this.grip = renderer.xr.getControllerGrip(index);
-    this.grip.add(controllerModelFactory.createControllerModel(this.grip));
+    viewGroup.add(controller);
 
+    this.viewGroup = viewGroup;
+
+    this.grip = grip;
     this.triggerHandler = triggerHandler;
+    this.stage = stage;
+  }
 
-    this.selecting = false;
+  tick(delta: number) {
+    // super.tick(delta); // Don't do standard procedures
+    // let bodyPosition = new Vector3();
+    // this.grip.getWorldPosition(bodyPosition);
+    // // this.stage.debug(`x: ${bodyPosition.x}, y: ${bodyPosition.y}, z: ${bodyPosition.z}`)
+    // this.rigidBody.setTranslation(bodyPosition, true);
   }
 
   getOrientation(): { origin: Vector3; direction: Vector3 } {
@@ -114,32 +132,18 @@ export class VRController {
   }
 
   onSelectStart() {
-    console.log('sel start', this.id, this.selecting, this.tracker);
     this.triggerHandler({
       id: this.id,
       orientation: this.getOrientation(),
       event: 'selectstart',
     });
-    this.selecting = true;
-    if (this.tracker) {
-      this.tracker.material = this.onMaterial;
-    }
   }
 
   onSelectEnd() {
-    console.log('sel end', this.id, this.selecting, this.tracker);
     this.triggerHandler({
       id: this.id,
       orientation: this.getOrientation(),
       event: 'selectend',
     });
-    this.selecting = false;
-    if (this.tracker) {
-      this.tracker.material = this.offMaterial;
-    }
-  }
-
-  sceneObjects(): Group[] {
-    return [this.controller, this.grip];
   }
 }

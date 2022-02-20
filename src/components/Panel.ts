@@ -28,25 +28,28 @@ export class Panel {
   private size: Vector2;
   private visible_: boolean;
   private fontSize: number;
-  private rendered: number;
+  private canvasWidth: number;
+  private canvasHeight: number;
+  private maxLines: number;
 
-  constructor(size: Vector2, position: Vector3, scale: number) {
+  constructor(size: Vector2, position: Vector3, scale: number, maxLines: number = 30) {
     this.lines = [];
+    this.maxLines = maxLines;
     this.canvas = document.createElement('canvas')!;
-    // document.body.appendChild(this.canvas);
+    document.body.appendChild(this.canvas);
     this.size = size;
-    this.canvas.width = size.x * resolution;
-    this.canvas.height = size.y * resolution;
-    this.context = this.canvas.getContext('2d')!;
     this.fontSize = 30;
-    this.rendered = 0;
+    this.canvasWidth = this.canvas.width = 1000;
+    this.canvasHeight = this.canvas.height = maxLines * this.fontSize;
+    this.context = this.canvas.getContext('2d')!;
 
     let geometry = new PlaneGeometry(size.x, size.y);
     this.texture = new CanvasTexture(this.canvas);
-    this.material = new MeshBasicMaterial({ map: this.texture, side: DoubleSide, transparent: true });
+    this.material = new MeshBasicMaterial({ map: this.texture, side: DoubleSide, opacity: 0.8, transparent: true });
     this.object = new Mesh(geometry, this.material);
     this.object.position.set(position.x, position.y, position.z);
-    this.visible_ = true;
+    this.setVisibility(false);
+    this.displayText();
   }
 
   appendText(text: string) {
@@ -54,26 +57,24 @@ export class Panel {
     this.displayText();
   }
 
-  displayText(clear: boolean = false) {
-    if (clear) {
-      this.rendered = 0;
-      this.context.clearRect(0, 0, this.size.x, this.size.y);
-    }
+  displayText() {
+    this.context.fillStyle = '#333';
+    this.context.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
     // let metrics = this.context.measureText(this.text);
     // let textWidth = metrics.width;
     // let textHeight = this.fontSize;
     this.context.font = 'normal ' + this.fontSize + 'px Arial';
     this.context.textAlign = 'left';
     this.context.textBaseline = 'top';
-    this.context.fillStyle = '#ff0000';
+    this.context.fillStyle = '#aaa';
 
-    for (let i = this.rendered; i < this.lines.length; i++) {
-      this.context.fillText(this.lines[i], 0, i * this.fontSize);
-      this.texture.needsUpdate = true;
-      this.material.map = this.texture;
-      this.material.map!.needsUpdate = true;
-    }
-    this.rendered = this.lines.length;
+    let maxLines = this.maxLines;
+    [...this.lines].reverse().slice(0, maxLines).forEach((line, i) => {
+      this.context.fillText(line, 0, (maxLines - i - 1) * this.fontSize);
+    });
+    this.texture.needsUpdate = true;
+    this.material.map = this.texture;
+    this.material.map!.needsUpdate = true;
   }
 
   sceneObjects(): Object3D<Event>[] {
@@ -82,5 +83,9 @@ export class Panel {
 
   setVisibility(show: boolean = true) {
     this.object.visible = this.visible_ = show;
+  }
+
+  toggleVisibility() {
+    this.setVisibility(!this.visible_);
   }
 }

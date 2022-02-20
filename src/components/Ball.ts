@@ -15,7 +15,7 @@ export class Ball extends Entity {
     colliderDesc: ColliderDesc,
     physics: Physics,
   ) {
-    super('ball', object, rigidBodyDesc, colliderDesc, physics);
+    super('ball', [object], rigidBodyDesc, colliderDesc, physics);
   }
 
   static async load(size: number, position: Vector3, physics: Physics) {

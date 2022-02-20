@@ -1,7 +1,7 @@
 import {
   Object3D,
+  Event,
   Group,
-  Mesh,
   PerspectiveCamera,
   Ray,
   Scene,
@@ -12,7 +12,7 @@ import {
 import { createCamera } from './components/camera';
 import { createScene } from './components/scene';
 import { createLights } from './components/lights';
-import { VRController, TriggerEvent } from './components/vrcontroller';
+import { VRController, TriggerEvent } from './components/VRController';
 
 import { OrbitControls, createControls } from './systems/controls';
 import { Interceptor } from './systems/Interceptor';
@@ -28,8 +28,7 @@ import { Ball } from './components/Ball';
 import { Bird } from './components/Bird';
 import { Floor } from './components/Floor';
 import { Physics } from './Physics';
-
-let i = 0;
+import { Entity } from './Entity';
 
 export class Stage {
   private container: Element;
@@ -42,6 +41,7 @@ export class Stage {
   private physics: Physics;
   private rose: Object3D;
   private debugPanel: Panel;
+  private entities: Map<string, Entity>;
 
   constructor(container: Element) {
     this.container = container;
@@ -53,9 +53,14 @@ export class Stage {
     this.loop = new Loop(this.camera, this.scene, this.renderer);
     this.controls = createControls(this.camera, this.renderer.domElement);
     this.physics = new Physics();
-    this.debugPanel = new Panel(new Vector2(0.6, 0.6), new Vector3(-0.5, 0.6, -1), 1);
+    this.debugPanel = new Panel(
+      new Vector2(0.6, 0.6),
+      new Vector3(-0.5, 0.6, -0.5),
+      1
+    );
     this.rose = getRose();
     this.rose.visible = false;
+    this.entities = new Map();
     container.append(this.renderer.domElement);
     container.appendChild(VRButton.createButton(this.renderer));
 
@@ -68,33 +73,33 @@ export class Stage {
     window.addEventListener('keypress', (event) =>
       this.handleKeycode(event.code)
     );
-
-    this.debug("test1");
-    this.debug("test2");
   }
 
   async load() {
-    let controllerLeft = new VRController(
-      'left',
-      1,
-      this.renderer,
-      'darkslateblue',
-      this.handleTrigger.bind(this)
-    );
-    let controllerRight = new VRController(
-      'right',
-      0,
-      this.renderer,
-      'firebrick',
-      this.handleTrigger.bind(this)
-    );
-
     const { ambientLight, mainLight } = createLights();
     let targets: Object3D<Event>[] = [];
     let targeted = false;
 
     let entities = await Promise.all([
       Bird.load('Parrot', new Vector3(0, 0, 0.25), this.physics),
+      new VRController(
+        'lcontroller',
+        1,
+        this.renderer,
+        this.handleTrigger.bind(this),
+        this.cameraGroup,
+        this.physics,
+        this
+      ),
+      new VRController(
+        'rcontroller',
+        0,
+        this.renderer,
+        this.handleTrigger.bind(this),
+        this.cameraGroup,
+        this.physics,
+        this
+      ),
       Bird.load('Flamingo', new Vector3(0.75, 0, -1), this.physics),
       Bird.load('Stork', new Vector3(0, -0.25, -1), this.physics),
       Floor.load(
@@ -106,48 +111,30 @@ export class Stage {
     ]);
     for (let entity of entities) {
       if (entity) {
+        this.entities.set(entity.id, entity);
         this.loop.updatables.push(entity);
-        this.scene.add(...entity.sceneObjects());
+        console.log(entity.id, entity.sceneObjects());
+        let sceneObjects: Object3D<Event>[] = entity.sceneObjects();
+        for (let sceneObject of sceneObjects) {
+          this.scene.add(sceneObject);
+        }
+
         if (!targeted) {
-          this.controls.target.copy(entity.object.position);
+          this.controls.target.copy(entity.objects[0].position);
           targeted = true;
         }
       }
     }
 
-    // Shrink ray
-    let interceptor0 = new Interceptor(
-      controllerLeft.controller,
-      targets,
-      ({ object }) => {
-        if (controllerLeft.selecting) {
-          object.scale.multiplyScalar(0.99);
-        }
-      }
+    this.loop.updatables.push(this, this.controls as any, this.physics); // TODO
+
+    this.scene.add(
+      ambientLight,
+      mainLight,
+      this.rose,
+      this.cameraGroup,
+      ...this.debugPanel.sceneObjects()
     );
-
-    // Grow ray
-    let interceptor1 = new Interceptor(
-      controllerRight.controller,
-      targets,
-      ({ object }) => {
-        if (controllerRight.selecting) {
-          object.scale.multiplyScalar(1.01);
-        }
-      }
-    );
-
-    this.loop.updatables.push(
-      this,
-      this.controls as any,
-      interceptor0,
-      interceptor1,
-      this.physics
-    ); // TODO
-
-    this.cameraGroup.add(...controllerLeft.sceneObjects(), ...controllerRight.sceneObjects());
-
-    this.scene.add(ambientLight, mainLight, this.rose, this.cameraGroup, ...this.debugPanel.sceneObjects());
   }
 
   start() {
@@ -163,11 +150,10 @@ export class Stage {
   }
 
   debug(message: string) {
-    this.debugPanel.appendText("Debug: " + message);
+    this.debugPanel.appendText('Debug: ' + message);
   }
 
   handlePointer(container: Element, cx: number, cy: number) {
-    this.debug("Click");
     // calculate pointer position in normalized device coordinates
     // (-1 to +1) for both components
     let el = this.renderer.domElement;
@@ -181,14 +167,30 @@ export class Stage {
     }
   }
 
-  handleTrigger({id, event, orientation}: TriggerEvent) {
-    this.debug("Trigger " + id + " " + event);
-    let entity = this.physics.castRay(
-      orientation.origin,
-      orientation.direction
-    );
-    if (entity) {
-      entity.debug();
+  handleTrigger({ id, event, orientation }: TriggerEvent) {
+    if (event === 'selectstart') {
+      if (id === 'lcontroller') {
+        this.toggleDebugPanel();
+
+        let entity = this.physics.castRay(
+          orientation.origin,
+          orientation.direction
+        );
+        if (entity) {
+          entity.debug();
+        }
+      }
+
+      if (id === 'rcontroller') {
+        this.physics.toggleColliders();
+
+        let ball = this.entities.get('ball')!;
+        let rcontroller = this.entities.get('rcontroller')!;
+        console.log({ ball, rcontroller });
+        if (ball) {
+          ball.track(rcontroller);
+        }
+      }
     }
   }
 
@@ -212,12 +214,22 @@ export class Stage {
   handleKeycode(code: string) {
     switch (code) {
       case 'KeyR':
-        if (this.rose) {
-          this.rose.visible = !this.rose.visible;
-        }
+        this.toggleRose();
         break;
+      case 'KeyD':
+        this.toggleDebugPanel();
+      case 'KeyC':
+        this.physics.toggleColliders();
       default:
         break;
     }
+  }
+
+  toggleRose() {
+    this.rose.visible = !this.rose.visible;
+  }
+
+  toggleDebugPanel() {
+    this.debugPanel.toggleVisibility();
   }
 }

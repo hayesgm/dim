@@ -12,28 +12,32 @@ import {
 
 export class Entity {
   uuid: string;
-  name: string;
+  id: string;
   group: Group;
-  object: Object3D<Event>;
+  objects: Object3D<Event>[];
   colliderObject: Object3D<Event>;
   rigidBodyDesc: RigidBodyDesc;
   colliderDesc: ColliderDesc;
   rigidBody: RigidBody;
   collider: Collider;
   debugging: boolean;
+  trackEntity: Entity | undefined;
 
   constructor(
-    name: string,
-    object: Object3D<Event>,
+    id: string,
+    objects: Object3D<Event>[],
     rigidBodyDesc: RigidBodyDesc,
     colliderDesc: ColliderDesc,
     physics: Physics,
   ) {
     this.uuid = MathUtils.generateUUID();
-    this.name = name;
+    this.id = id;
+    // TODO: Handle group better
     this.group = new Group();
-    this.object = object;
-    this.group.add(object);
+    this.objects = objects;
+    for (let object of objects) {
+      this.group.add(object);
+    }
     this.rigidBodyDesc = rigidBodyDesc;
     this.colliderDesc = colliderDesc;
     this.colliderObject = getColliderObject(this.colliderDesc);
@@ -66,9 +70,17 @@ export class Entity {
     return new Vector3(transaction.x, transaction.y, transaction.z);
   }
 
+  track(entity: Entity) {
+    this.trackEntity = entity;
+  }
+
   tick(delta: number) {
-    let position = this.position();
-    this.group.position.set(position.x, position.y, position.z);
+    if (this.trackEntity) {
+      // TODO:
+    } else {
+      let position = this.position();
+      this.group.position.set(position.x, position.y, position.z);
+    }
   }
 
   sceneObjects(): Object3D<Event>[] {

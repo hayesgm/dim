@@ -13,7 +13,7 @@ export class Bird extends Entity {
   deviation: number;
 
   constructor(
-    name: string,
+    id: string,
     object: Object3D<Event>,
     mixer: AnimationMixer,
     flightLevel: number,
@@ -21,7 +21,7 @@ export class Bird extends Entity {
     colliderDesc: ColliderDesc,
     physics: Physics,
   ) {
-    super(name, object, rigidBodyDesc, colliderDesc, physics);
+    super(id, [object], rigidBodyDesc, colliderDesc, physics);
     this.mixer = mixer;
     this.flightLevel = flightLevel;
     this.deviation = 0;
@@ -33,7 +33,7 @@ export class Bird extends Entity {
       { scale: 0.002 }
     );
     return new Bird(
-      model,
+      model.toLowerCase(),
       object,
       mixer,
       position.y,

@@ -24,6 +24,7 @@ export class Physics {
   entities: Map<string, PhysicalEntity>;
   colliderIndex: Map<number, string>;
   lastStep: number;
+  collidersShowing: boolean;
 
   constructor() {
     let gravity = { x: 0.0, y: -9.81, z: 0.0 };
@@ -32,6 +33,7 @@ export class Physics {
     this.entities = new Map();
     this.colliderIndex = new Map();
     this.lastStep = 0;
+    this.collidersShowing = false;
   }
 
   track(entity: Entity) {
@@ -80,6 +82,13 @@ export class Physics {
     if (this.lastStep > stepDelta) {
       this.world.step();
       this.lastStep = 0;
+    }
+  }
+
+  toggleColliders() {
+    this.collidersShowing = !this.collidersShowing;
+    for (let entityObject of this.entities.values()) {
+      entityObject.entity.showCollider(this.collidersShowing);
     }
   }
 }

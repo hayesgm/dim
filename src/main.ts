@@ -17,4 +17,5 @@ async function main(selector: string) {
 
 main('#three').catch((err) => {
   console.error(err);
+  alert(err);
 });
