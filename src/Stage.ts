@@ -12,7 +12,7 @@ import {
 import { createCamera } from './components/camera';
 import { createScene } from './components/scene';
 import { createLights } from './components/lights';
-import { Controller, TriggerEvent } from './components/vrcontroller';
+import { VRController, TriggerEvent } from './components/vrcontroller';
 
 import { OrbitControls, createControls } from './systems/controls';
 import { Interceptor } from './systems/Interceptor';
@@ -53,7 +53,7 @@ export class Stage {
     this.loop = new Loop(this.camera, this.scene, this.renderer);
     this.controls = createControls(this.camera, this.renderer.domElement);
     this.physics = new Physics();
-    this.debugPanel = new Panel(new Vector2(1000, 300), new Vector3(-0.5, 0.3, -1), 1);
+    this.debugPanel = new Panel(new Vector2(0.6, 0.4), new Vector3(-0.5, 0.3, -1), 1);
     this.rose = getRose();
     this.rose.visible = false;
     container.append(this.renderer.domElement);
@@ -74,19 +74,19 @@ export class Stage {
   }
 
   async load() {
-    let controllerLeft = new Controller(
+    let controllerLeft = new VRController(
       'left',
       1,
       this.renderer,
       'darkslateblue',
-      this.handleTrigger
+      this.handleTrigger.bind(this)
     );
-    let controllerRight = new Controller(
+    let controllerRight = new VRController(
       'right',
       0,
       this.renderer,
       'firebrick',
-      this.handleTrigger
+      this.handleTrigger.bind(this)
     );
 
     const { ambientLight, mainLight } = createLights();

@@ -1,9 +1,12 @@
 import {
   BoxBufferGeometry,
+  DoubleSide,
+  CanvasTexture,
   Event,
   Object3D,
-  Sprite,
-  SpriteMaterial,
+  PlaneGeometry,
+  Mesh,
+  MeshBasicMaterial,
   Texture,
   Vector2,
   Vector3,
@@ -13,13 +16,15 @@ interface Sceneable {
   sceneObjects(): Object3D<Event>[];
 }
 
+const resolution = 1000;
+
 export class Panel {
   lines: string[];
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
-  private object: Sprite;
+  private object: Mesh;
   private texture: Texture;
-  private material: SpriteMaterial;
+  private material: MeshBasicMaterial;
   private size: Vector2;
   private visible_: boolean;
   private fontSize: number;
@@ -28,20 +33,20 @@ export class Panel {
   constructor(size: Vector2, position: Vector3, scale: number) {
     this.lines = [];
     this.canvas = document.createElement('canvas')!;
+    // document.body.appendChild(this.canvas);
     this.size = size;
-    this.canvas.width = size.x;
-    this.canvas.height = size.y;
+    this.canvas.width = size.x * resolution;
+    this.canvas.height = size.y * resolution;
     this.context = this.canvas.getContext('2d')!;
     this.fontSize = 30;
     this.rendered = 0;
 
-    this.texture = new Texture(this.canvas);
-    this.material = new SpriteMaterial({ map: this.texture });
-    this.object = new Sprite(this.material);
+    let geometry = new PlaneGeometry(size.x, size.y);
+    this.texture = new CanvasTexture(this.canvas);
+    this.material = new MeshBasicMaterial({ map: this.texture, side: DoubleSide, transparent: true });
+    this.object = new Mesh(geometry, this.material);
     this.object.position.set(position.x, position.y, position.z);
-    this.object.scale.set(scale, scale, 1);
     this.visible_ = true;
-    // document.body.appendChild(this.canvas);
   }
 
   appendText(text: string) {

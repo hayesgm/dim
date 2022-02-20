@@ -19,7 +19,10 @@ import { XRInputSource } from 'webxr';
 
 const controllerModelFactory = new XRControllerModelFactory();
 
-function getTrackingObject(source: XRInputSource, material: LineBasicMaterial): Line {
+function getTrackingObject(
+  source: XRInputSource,
+  material: LineBasicMaterial
+): Line {
   let geometry;
 
   switch (source.targetRayMode) {
@@ -42,15 +45,15 @@ function getTrackingObject(source: XRInputSource, material: LineBasicMaterial): 
 }
 
 export interface TriggerEvent {
-  id: string,
-  event: 'selectstart' | 'selectend'
+  id: string;
+  event: 'selectstart' | 'selectend';
   orientation: {
-    origin: Vector3,
-    direction: Vector3
-  }
-};
+    origin: Vector3;
+    direction: Vector3;
+  };
+}
 
-export class Controller {
+export class VRController {
   id: string;
   controller: Group;
   grip: Group;
@@ -58,9 +61,15 @@ export class Controller {
   selecting: boolean;
   offMaterial: LineBasicMaterial;
   onMaterial: LineBasicMaterial;
-  triggerHandler: (event: TriggerEvent) => void
+  triggerHandler: (event: TriggerEvent) => void;
 
-  constructor(id: string, index: number, renderer: WebGLRenderer, onColor: string, triggerHandler: (event: TriggerEvent) => void) {
+  constructor(
+    id: string,
+    index: number,
+    renderer: WebGLRenderer,
+    onColor: string,
+    triggerHandler: (event: TriggerEvent) => void
+  ) {
     this.id = id;
 
     this.offMaterial = new LineBasicMaterial({
@@ -71,7 +80,7 @@ export class Controller {
     this.onMaterial = new LineBasicMaterial({
       vertexColors: true,
       blending: AdditiveBlending,
-      color: onColor
+      color: onColor,
     });
 
     let controller = renderer.xr.getController(index);
@@ -93,7 +102,7 @@ export class Controller {
     this.selecting = false;
   }
 
-  getOrientation(): { origin: Vector3, direction: Vector3 } {
+  getOrientation(): { origin: Vector3; direction: Vector3 } {
     let tempMatrix = new Matrix4();
     tempMatrix.identity().extractRotation(this.controller.matrixWorld);
     let origin = new Vector3();
@@ -101,12 +110,16 @@ export class Controller {
     origin.setFromMatrixPosition(this.controller.matrixWorld);
     let direction = new Vector3(0, 0, -1).applyMatrix4(tempMatrix).normalize();
 
-    return { origin, direction }
+    return { origin, direction };
   }
 
   onSelectStart() {
     console.log('sel start', this.id, this.selecting, this.tracker);
-    this.triggerHandler({ id: this.id, orientation: this.getOrientation(), event: 'selectstart' });
+    this.triggerHandler({
+      id: this.id,
+      orientation: this.getOrientation(),
+      event: 'selectstart',
+    });
     this.selecting = true;
     if (this.tracker) {
       this.tracker.material = this.onMaterial;
@@ -115,7 +128,11 @@ export class Controller {
 
   onSelectEnd() {
     console.log('sel end', this.id, this.selecting, this.tracker);
-    this.triggerHandler({ id: this.id, orientation: this.getOrientation(), event: 'selectend' });
+    this.triggerHandler({
+      id: this.id,
+      orientation: this.getOrientation(),
+      event: 'selectend',
+    });
     this.selecting = false;
     if (this.tracker) {
       this.tracker.material = this.offMaterial;
