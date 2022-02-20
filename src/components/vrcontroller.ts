@@ -60,8 +60,8 @@ export interface TriggerEvent {
   };
 }
 
-const positionCount = 10;
-let i = 0;
+const positionCount = 20;
+const skipTime = 0.025;
 
 export class VRController extends Entity {
   controller: Group;
@@ -76,6 +76,7 @@ export class VRController extends Entity {
   positionsZ: Float32Array;
   positionsTime: Float32Array;
   positionsIndex: number;
+  skippedTime: number;
 
   constructor(
     id: string,
@@ -98,7 +99,7 @@ export class VRController extends Entity {
         bodyPosition.y,
         bodyPosition.z
       );
-    let colliderDesc = ColliderDesc.ball(0.1).setDensity(0.5).setCollisionGroups(0);
+    let colliderDesc = ColliderDesc.ball(0.1).setCollisionGroups(0);
     super(id, [], rigidBodyDesc, colliderDesc, physics);
 
     let controller = renderer.xr.getController(index);
@@ -127,7 +128,8 @@ export class VRController extends Entity {
     this.positionsY = new Float32Array(positionCount);
     this.positionsZ = new Float32Array(positionCount);
     this.positionsTime = new Float32Array(positionCount);
-    this.positionsIndex = 10;
+    this.positionsIndex = 0;
+    this.skippedTime = 0;
   }
 
   tick(delta: number) {
@@ -136,12 +138,18 @@ export class VRController extends Entity {
     this.grip.getWorldPosition(bodyPosition);
     this.rigidBody.setTranslation(bodyPosition, true);
 
-    let pi = this.positionsIndex;
-    this.positionsX[pi % positionCount] = bodyPosition.x;
-    this.positionsY[pi % positionCount] = bodyPosition.y;
-    this.positionsZ[pi % positionCount] = bodyPosition.z;
-    this.positionsTime[pi % positionCount] = (this.positionsTime[(positionCount + pi - 1) % positionCount] ?? 0) + delta;
-    this.positionsIndex++;
+    this.skippedTime += delta;
+    // console.log("st", this.skippedTime, this.positionsIndex);
+
+    if (this.skippedTime > skipTime) {
+      let pi = this.positionsIndex;
+      this.positionsX[pi % positionCount] = bodyPosition.x;
+      this.positionsY[pi % positionCount] = bodyPosition.y;
+      this.positionsZ[pi % positionCount] = bodyPosition.z;
+      this.positionsTime[pi % positionCount] = (this.positionsTime[(positionCount + pi - 1) % positionCount] ?? 0) + this.skippedTime;
+      this.positionsIndex++;
+      this.skippedTime = 0;
+    }
 
     // if (i++ % 100 === 0) {
     //   this.stage.debug("Velocity: " + JSON.stringify(this.getAverageVelocity().toArray()));

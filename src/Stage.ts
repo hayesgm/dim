@@ -188,9 +188,12 @@ export class Stage {
         let mass = ball.rigidBody.mass();
         this.debug(`Velocity: x=${velocity.x.toFixed(3)},y=${velocity.y.toFixed(3)},z=${velocity.z.toFixed(3)}`);
         this.debug(`Mass: ${mass}`);
+        let linearVel = ball.rigidBody.linvel();
+        this.debug(`Linear Vel: x=${linearVel.x.toFixed(3)},y=${linearVel.y.toFixed(3)},z=${linearVel.z.toFixed(3)}`);
         let impulse = velocity.multiplyScalar(mass);
         this.debug(`Impulse: x=${impulse.x.toFixed(3)},y=${impulse.y.toFixed(3)},z=${impulse.z.toFixed(3)}`);
-        ball.rigidBody.applyImpulse(impulse, true)
+        // ball.rigidBody.applyImpulse(impulse, true)
+        ball.rigidBody.setLinvel(velocity, true);
         ball.track(null);
       }
     } else if (event === 'selectstart' && id === 'rcontroller') {

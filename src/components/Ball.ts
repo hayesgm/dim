@@ -30,7 +30,7 @@ export class Ball extends Entity {
         position.y,
         position.z
       ),
-      ColliderDesc.ball(size * 1.5).setDensity(0.5),
+      ColliderDesc.ball(size * 0.5).setDensity(0.5),
       physics
     );
   }
