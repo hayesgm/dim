@@ -185,16 +185,10 @@ export class Stage {
       let ball = this.entities.get('ball')!;
       let rcontroller = this.entities.get('rcontroller')! as VRController;
       if (ball) {
-        let velocity = rcontroller.getAverageVelocity();
-        let mass = ball.rigidBody.mass();
-        this.debug(`Velocity: x=${velocity.x.toFixed(3)},y=${velocity.y.toFixed(3)},z=${velocity.z.toFixed(3)}`);
-        // this.debug(`Mass: ${mass}`);
-        // let linearVel = ball.rigidBody.linvel();
-        // this.debug(`Linear Vel: x=${linearVel.x.toFixed(3)},y=${linearVel.y.toFixed(3)},z=${linearVel.z.toFixed(3)}`);
-        // let impulse = velocity.clone().multiplyScalar(mass);
-        // this.debug(`Impulse: x=${impulse.x.toFixed(3)},y=${impulse.y.toFixed(3)},z=${impulse.z.toFixed(3)}`);
+        let velocity = rcontroller.getAverageVelocity().multiplyScalar(1.3);
+        this.debug(`Velocity+: x=${velocity.x.toFixed(3)},y=${velocity.y.toFixed(3)},z=${velocity.z.toFixed(3)}`);
         ball.rigidBody.setTranslation(rcontroller.position(), false);
-        ball.rigidBody.setLinvel(velocity.multiplyScalar(1.3), true);
+        ball.rigidBody.setLinvel(velocity, true);
         ball.track(null);
       }
     } else if (event === 'selectstart' && id === 'rcontroller') {

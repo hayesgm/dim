@@ -143,7 +143,6 @@ export class VRController extends Entity {
     }
 
     this.skippedTime += delta;
-    // console.log("st", this.skippedTime, this.positionsIndex);
 
     if (this.skippedTime > skipTime) {
       let pi = this.positionsIndex;
@@ -154,12 +153,6 @@ export class VRController extends Entity {
       this.positionsIndex++;
       this.skippedTime = 0;
     }
-
-    // if (i++ % 100 === 0) {
-    //   this.stage.debug("Velocity: " + JSON.stringify(this.getAverageVelocity().toArray()));
-    //   let otherVel = this.rigidBody.linvel();
-    //   this.stage.debug(`Other Velocity: ${otherVel.x}, ${otherVel.y}, ${otherVel.z}`);
-    // }
   }
 
   getOrientation(): { origin: Vector3; direction: Vector3 } {
