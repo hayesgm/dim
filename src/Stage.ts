@@ -53,7 +53,7 @@ export class Stage {
     this.loop = new Loop(this.camera, this.scene, this.renderer);
     this.controls = createControls(this.camera, this.renderer.domElement);
     this.physics = new Physics();
-    this.debugPanel = new Panel(new Vector2(0.6, 0.4), new Vector3(-0.5, 0.3, -1), 1);
+    this.debugPanel = new Panel(new Vector2(0.6, 0.6), new Vector3(-0.5, 0.6, -1), 1);
     this.rose = getRose();
     this.rose.visible = false;
     container.append(this.renderer.domElement);
@@ -182,7 +182,7 @@ export class Stage {
   }
 
   handleTrigger({id, event, orientation}: TriggerEvent) {
-    this.debug("Trigger " + id);
+    this.debug("Trigger " + id + " " + event);
     let entity = this.physics.castRay(
       orientation.origin,
       orientation.direction
