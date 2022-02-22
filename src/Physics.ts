@@ -1,6 +1,7 @@
 import { Vector2, Vector3 } from 'three';
 import type * as Rapier from '@dimforge/rapier3d';
 import { Entity } from './Entity';
+import { Stage } from './Stage';
 import {
   EventQueue,
   World,
@@ -24,14 +25,16 @@ export class Physics {
   colliderIndex: Map<number, string>;
   lastStep: number;
   collidersShowing: boolean;
+  stage: Stage;
 
-  constructor() {
+  constructor(stage: Stage) {
     let gravity = { x: 0.0, y: -9.81, z: 0.0 };
     this.world = new World(gravity);
     this.entities = new Map();
     this.colliderIndex = new Map();
     this.lastStep = 0;
     this.collidersShowing = false;
+    this.stage = stage;
   }
 
   track(entity: Entity) {
@@ -83,7 +86,7 @@ export class Physics {
     let eventQueue = new EventQueue(true);
     this.world.step(eventQueue);
     eventQueue.drainIntersectionEvents((handle1, handle2, intersecting) => {
-      console.log("something");
+      this.stage.debug(`handle1: ${handle1}, handle2: ${handle2}, intersecting: ${intersecting}`);
       let entityUUID1 = this.colliderIndex.get(handle1);
       if (entityUUID1) {
         let entity1 = this.entities.get(entityUUID1);

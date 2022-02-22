@@ -58,7 +58,7 @@ export class Stage {
     this.loop = new Loop(this.camera, this.scene, this.renderer);
     container.append(this.renderer.domElement);
     this.controls = createControls(this.camera, this.renderer.domElement);
-    this.physics = new Physics();
+    this.physics = new Physics(this);
     this.debugPanel = new Panel(
       new Vector2(1.2, 1.2),
       new Vector3(-0.9, 0.6, -2)

@@ -2,6 +2,7 @@ import { AnimationMixer, Object3D, Event, Vector3 } from 'three';
 import { loadModel } from '../systems/model';
 import { Physics } from '../Physics';
 import {
+  ActiveEvents,
   RigidBodyDesc,
   ColliderDesc,
   CoefficientCombineRule,
@@ -35,6 +36,7 @@ export class Basketball extends Entity {
           .setRestitution(0.7)
           .setRestitutionCombineRule(CoefficientCombineRule.Max)
           .setTranslation(0, size * 0.5, 0)
+          .setActiveEvents(ActiveEvents.INTERSECTION_EVENTS)
       ],
       physics
     );
