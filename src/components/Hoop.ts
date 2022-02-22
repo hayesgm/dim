@@ -134,15 +134,14 @@ export class Hoop extends Entity {
   }
 
   handleCollision(handle1: number, handle2: number, intersecting: boolean) {
+    this.stage.debug(`hoop: ${this.id}, handle1: ${handle1}, handle2: ${handle2}, intersecting: ${intersecting}`);
     let upperRimSensor = this.colliders[0].handle;
     let lowerRimSensor = this.colliders[1].handle;
     // TODO: Check other handle is ball
 
-    this.stage.debug(`handle1: ${handle1}, handle2: ${handle2}, intersecting: ${intersecting}`);
-
     if (intersecting && (handle1 === upperRimSensor || handle2 === upperRimSensor)) {
       this.intersectingTop = true;
-      this.stage.debug("Intersecting...");
+      this.stage.debug("Intersecting top...");
     }
 
     if (intersecting && (handle1 === lowerRimSensor || handle2 === lowerRimSensor)) {
