@@ -89,7 +89,7 @@ export class Stage {
       ball,
       new VRController(
         'lcontroller',
-        1,
+        0,
         this.renderer,
         this.handleTrigger.bind(this),
         this.cameraGroup,
@@ -98,7 +98,7 @@ export class Stage {
       ),
       new VRController(
         'rcontroller',
-        0,
+        1, // TODO: Figure out order
         this.renderer,
         this.handleTrigger.bind(this),
         this.cameraGroup,
@@ -168,6 +168,7 @@ export class Stage {
   }
 
   handleTrigger({ id, event, orientation }: TriggerEvent) {
+    this.debug("id: " + id + ", event: " + event);
     if (event === 'squeezestart' && id === 'lcontroller') {
       this.toggleDebugPanel();
     } else if (event === 'selectstart' && id === 'lcontroller') {
