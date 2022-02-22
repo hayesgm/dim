@@ -83,6 +83,7 @@ export class Physics {
     let eventQueue = new EventQueue(true);
     this.world.step(eventQueue);
     eventQueue.drainIntersectionEvents((handle1, handle2, intersecting) => {
+      console.log("something");
       let entityUUID1 = this.colliderIndex.get(handle1);
       if (entityUUID1) {
         let entity1 = this.entities.get(entityUUID1);

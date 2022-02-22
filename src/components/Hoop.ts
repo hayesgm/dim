@@ -10,6 +10,7 @@ import {
 import { loadModel } from '../systems/model';
 import { Physics } from '../Physics';
 import {
+  ActiveEvents,
   RigidBodyDesc,
   ColliderDesc,
   CoefficientCombineRule,
@@ -75,10 +76,12 @@ export class Hoop extends Entity {
         // Uppper Rim Sensor
         ColliderDesc.ball(size * 0.03)
           .setTranslation(size * 0, size * 0.735, size * (-0.38 - rimRadius ))
+          .setActiveEvents(ActiveEvents.INTERSECTION_EVENTS)
           .setSensor(true),
         // Lower Rim Sensor
         ColliderDesc.ball(size * 0.03)
           .setTranslation(size * 0, size * 0.635, size * (-0.38 - rimRadius ))
+          .setActiveEvents(ActiveEvents.INTERSECTION_EVENTS)
           .setSensor(true),
         // Base
         ColliderDesc.cuboid(size * 0.25, size * 0.2, size * 0.25)
