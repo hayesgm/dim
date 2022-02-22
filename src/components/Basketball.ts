@@ -15,7 +15,7 @@ export class Basketball extends Entity {
     colliderDescs: ColliderDesc[],
     physics: Physics
   ) {
-    super('ball', [object], rigidBodyDesc, colliderDescs, false, physics);
+    super('basketball', [object], rigidBodyDesc, colliderDescs, false, physics);
   }
 
   static async load(size: number, position: Vector3, physics: Physics) {

@@ -123,7 +123,7 @@ export class Stage {
       }
     }
 
-    this.controls.target.copy(this.entities.get('ball')!.position());
+    this.controls.target.copy(this.entities.get('basketball')!.position());
 
     this.loop.updatables.push(this, this.controls as any, this.physics); // TODO
 
