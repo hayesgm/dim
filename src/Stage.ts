@@ -55,24 +55,24 @@ export class Stage {
     this.scene = createScene();
     this.renderer = createRenderer();
     this.loop = new Loop(this.camera, this.scene, this.renderer);
+    container.append(this.renderer.domElement);
     this.controls = createControls(this.camera, this.renderer.domElement);
     this.physics = new Physics();
     this.debugPanel = new Panel(
       new Vector2(1.2, 1.2),
-      new Vector3(-0.5, 0.6, -0.5)
+      new Vector3(-0.9, 0.6, -2)
     );
     this.debug('Build ' + buildNumber);
     this.rose = getRose();
     this.rose.visible = false;
     this.entities = new Map();
-    container.append(this.renderer.domElement);
     container.appendChild(VRButton.createButton(this.renderer));
 
     const resizer = new Resizer(container, this.camera, this.renderer);
 
-    this.renderer.domElement.addEventListener('click', (event) =>
-      this.handlePointer(container, event.clientX, event.clientY)
-    );
+    // this.renderer.domElement.addEventListener('click', (event) =>
+    //   this.handlePointer(container, event.clientX, event.clientY)
+    // );
 
     window.addEventListener('keypress', (event) =>
       this.handleKeycode(event.code)
@@ -82,11 +82,10 @@ export class Stage {
   async load() {
     const { ambientLight, mainLight } = createLights();
     let targets: Object3D<Event>[] = [];
-    let targeted = false;
 
     let ball = await Basketball.load(0.18, new Vector3(0.75, 0, -0.5), this.physics);
     let entities = await Promise.all([
-      Hoop.load(2.0, new Vector3(0, 2.5, -1), new Euler(MathUtils.degToRad(10), MathUtils.degToRad(0), MathUtils.degToRad(10), 'XYZ'), this.physics),
+      Hoop.load(2.0, new Vector3(0, 2.5, -1), new Euler(MathUtils.degToRad(0), MathUtils.degToRad(180), MathUtils.degToRad(0), 'XYZ'), this.physics),
       ball,
       new VRController(
         'lcontroller',
@@ -121,13 +120,10 @@ export class Stage {
         for (let sceneObject of sceneObjects) {
           this.scene.add(sceneObject);
         }
-
-        if (!targeted) {
-          this.controls.target.copy(entity.objects[0].position);
-          targeted = true;
-        }
       }
     }
+
+    this.controls.target.copy(this.entities.get('ball')!.position());
 
     this.loop.updatables.push(this, this.controls as any, this.physics); // TODO
 

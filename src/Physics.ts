@@ -14,7 +14,7 @@ interface PhysicalEntity {
   uuid: string;
   entity: Entity;
   rigidBody: RigidBody;
-  collider: Collider;
+  colliders: Collider[];
 }
 
 export class Physics {
@@ -35,20 +35,23 @@ export class Physics {
 
   track(entity: Entity) {
     let rigidBody = this.world.createRigidBody(entity.rigidBodyDesc);
-    let collider = this.world.createCollider(
-      entity.colliderDesc,
-      rigidBody.handle
-    );
-    this.colliderIndex.set(collider.handle, entity.uuid);
+    let colliders: Collider[] = [];
+    for (let colliderDesc of entity.colliderDescs) {
+      let collider = this.world.createCollider(
+        colliderDesc,
+        rigidBody.handle
+      );
+      this.colliderIndex.set(collider.handle, entity.uuid);
+    }
     this.entities.set(entity.uuid, {
       uuid: entity.uuid,
       entity,
       rigidBody,
-      collider,
+      colliders,
     });
     return {
       rigidBody,
-      collider
+      colliders
     }
   }
 

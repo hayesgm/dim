@@ -10,7 +10,7 @@ export function createCamera(): { cameraGroup: Group, camera: PerspectiveCamera 
 
   let cameraGroup = new Group();
   // move the camera back so we can view the scene
-  cameraGroup.position.set(-0.5, 0.5, 2);
+  cameraGroup.position.set(-0.5, 0.5, 3);
   cameraGroup.add(camera);
 
   return { cameraGroup, camera };

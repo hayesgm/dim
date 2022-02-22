@@ -17,10 +17,10 @@ export class Floor extends Entity {
   constructor(
     object: Object3D<Event>,
     rigidBodyDesc: RigidBodyDesc,
-    colliderDesc: ColliderDesc[],
+    colliderDescs: ColliderDesc[],
     physics: Physics
   ) {
-    super('floor', [object], rigidBodyDesc, colliderDesc, false, physics);
+    super('floor', [object], rigidBodyDesc, colliderDescs, false, physics);
   }
 
   static async load(size: Vector3, position: Vector3, physics: Physics) {

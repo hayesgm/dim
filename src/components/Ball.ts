@@ -12,10 +12,10 @@ export class Ball extends Entity {
   constructor(
     object: Object3D<Event>,
     rigidBodyDesc: RigidBodyDesc,
-    colliderDesc: ColliderDesc[],
+    colliderDescs: ColliderDesc[],
     physics: Physics
   ) {
-    super('ball', [object], rigidBodyDesc, colliderDesc, false, physics);
+    super('ball', [object], rigidBodyDesc, colliderDescs, false, physics);
   }
 
   static async load(size: number, position: Vector3, physics: Physics) {

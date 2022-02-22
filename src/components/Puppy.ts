@@ -43,10 +43,10 @@ export class Puppy extends Entity {
     mixer: AnimationMixer,
     flightLevel: number,
     rigidBodyDesc: RigidBodyDesc,
-    colliderDesc: ColliderDesc[],
+    colliderDescs: ColliderDesc[],
     physics: Physics
   ) {
-    super(id, [object], rigidBodyDesc, colliderDesc, true, physics);
+    super(id, [object], rigidBodyDesc, colliderDescs, true, physics);
     this.ball = ball;
     this.animations = animations;
     this.mixer = mixer;

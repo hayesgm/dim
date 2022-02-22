@@ -12,10 +12,10 @@ export class Basketball extends Entity {
   constructor(
     object: Object3D<Event>,
     rigidBodyDesc: RigidBodyDesc,
-    colliderDesc: ColliderDesc[],
+    colliderDescs: ColliderDesc[],
     physics: Physics
   ) {
-    super('ball', [object], rigidBodyDesc, colliderDesc, false, physics);
+    super('ball', [object], rigidBodyDesc, colliderDescs, false, physics);
   }
 
   static async load(size: number, position: Vector3, physics: Physics) {
@@ -33,7 +33,8 @@ export class Basketball extends Entity {
         ColliderDesc.ball(size * 0.5)
           .setDensity(0.5)
           .setRestitution(0.7)
-          .setRestitutionCombineRule(CoefficientCombineRule.Max),
+          .setRestitutionCombineRule(CoefficientCombineRule.Max)
+          .setTranslation(0, size * 0.5, 0)
       ],
       physics
     );

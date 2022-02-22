@@ -16,14 +16,14 @@ export class Entity {
   id: string;
   group: Group;
   objects: Object3D<Event>[];
-  colliderObject: Object3D<Event>;
+  colliderObjects: Object3D<Event>[];
   rigidBodyDesc: RigidBodyDesc;
-  colliderDesc: ColliderDesc[];
+  colliderDescs: ColliderDesc[];
   rigidBody: RigidBody;
-  collider: Collider;
+  colliders: Collider[];
   debugging: boolean;
   trackEntity: Entity | null;
-  debugPanel: Panel;
+  debugPanel: Panel | undefined;
   initialBoundingBox: Box3;
   animated: boolean;
   skeleton?: SkeletonHelper;
@@ -32,7 +32,7 @@ export class Entity {
     id: string,
     objects: Object3D<Event>[],
     rigidBodyDesc: RigidBodyDesc,
-    colliderDesc: ColliderDesc[],
+    colliderDescs: ColliderDesc[],
     animated: boolean,
     physics: Physics,
   ) {
@@ -49,18 +49,24 @@ export class Entity {
     initialBoundingBox.setFromObject(this.group, true);
     this.initialBoundingBox = initialBoundingBox;
     this.rigidBodyDesc = rigidBodyDesc;
-    this.colliderDesc = colliderDesc;
-    let { geometry, line } = getColliderObject(this.colliderDesc);
-    this.colliderObject = line;
-    let { rigidBody, collider } = physics.track(this);
+    this.colliderDescs = colliderDescs;
+    this.colliderObjects = [];
+    for (let colliderDesc of this.colliderDescs) {
+      let { geometry, line } = getColliderObject(colliderDesc);
+      this.colliderObjects.push(line);  
+
+      // TODO: Improve this -- or scrap it?
+      geometry.computeBoundingBox();
+      let colliderBoundingBox = geometry.boundingBox!;
+      let width = colliderBoundingBox.max.x - colliderBoundingBox.min.x;
+      this.debugPanel = new Panel(new Vector2(0.2, 0.3), new Vector3(colliderBoundingBox.max.x + width * 1.2, colliderBoundingBox.max.y, colliderBoundingBox.min.z));    
+    }
+
+    let { rigidBody, colliders } = physics.track(this);
     this.rigidBody = rigidBody;
-    this.collider = collider;
+    this.colliders = colliders;
     this.debugging = false;
     this.trackEntity = null;
-    geometry.computeBoundingBox();
-    let colliderBoundingBox = geometry.boundingBox!;
-    let width = colliderBoundingBox.max.x - colliderBoundingBox.min.x;
-    this.debugPanel = new Panel(new Vector2(0.2, 0.3), new Vector3(colliderBoundingBox.max.x + width * 1.2, colliderBoundingBox.max.y, colliderBoundingBox.min.z));    
     this.animated = animated;
   }
 
@@ -71,16 +77,16 @@ export class Entity {
   }
 
   debug(message: string) {
-    this.debugPanel.appendText(message);
+    this.debugPanel!.appendText(message);
   }
 
   toggleDebug() {
     this.debugging = !this.debugging;
 
     if (this.debugging) {
-      this.group.add(...this.debugPanel.sceneObjects());
+      this.group.add(...this.debugPanel!.sceneObjects());
     } else {
-      this.group.remove(...this.debugPanel.sceneObjects());
+      this.group.remove(...this.debugPanel!.sceneObjects());
     }
     console.log(this);
     console.log("Entity stored in 'entity' var...");
@@ -98,11 +104,10 @@ export class Entity {
   }
 
   showCollider(show: boolean = true) {
-    console.log({show});
     if (show) {
-      this.group.add(this.colliderObject);
+      this.group.add(...this.colliderObjects);
     } else {
-      this.group.remove(this.colliderObject);
+      this.group.remove(...this.colliderObjects);
     }
     this.group.updateMatrixWorld(true);
   }
@@ -127,20 +132,20 @@ export class Entity {
       this.rigidBody.setTranslation(this.trackEntity.position(), false);
     }
 
-    if (false) {
-      let boundingBox = new Box3();
-      boundingBox.setFromObject(this.group, true);
+    // if (false) {
+    //   let boundingBox = new Box3();
+    //   boundingBox.setFromObject(this.group, true);
 
-      let initMin = this.initialBoundingBox.min.clone();
-      initMin.applyMatrix4(this.group.matrixWorld)
+    //   let initMin = this.initialBoundingBox.min.clone();
+    //   initMin.applyMatrix4(this.group.matrixWorld)
 
-      let translation = boundingBox.min.clone().sub(initMin);
-      let initialTranslation = this.colliderDesc.translation;
-      let initialTranslationVec3 = new Vector3(initialTranslation.x, initialTranslation.y, initialTranslation.z)
-      let final = initialTranslationVec3.clone().add(translation);
-      this.collider.setTranslationWrtParent(final);
-      this.colliderObject.position.set(translation.x, translation.y, translation.z);
-    }
+    //   let translation = boundingBox.min.clone().sub(initMin);
+    //   let initialTranslation = this.colliderDesc.translation;
+    //   let initialTranslationVec3 = new Vector3(initialTranslation.x, initialTranslation.y, initialTranslation.z)
+    //   let final = initialTranslationVec3.clone().add(translation);
+    //   this.collider.setTranslationWrtParent(final);
+    //   this.colliderObjects[0].position.set(translation.x, translation.y, translation.z);
+    // }
 
     this.group.position.copy(this.position());
     this.group.rotation.setFromQuaternion(this.rotation());

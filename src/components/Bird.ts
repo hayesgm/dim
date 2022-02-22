@@ -19,10 +19,10 @@ export class Bird extends Entity {
     mixer: AnimationMixer,
     flightLevel: number,
     rigidBodyDesc: RigidBodyDesc,
-    colliderDesc: ColliderDesc[],
+    colliderDescs: ColliderDesc[],
     physics: Physics
   ) {
-    super(id, [object], rigidBodyDesc, colliderDesc, false, physics);
+    super(id, [object], rigidBodyDesc, colliderDescs, false, physics);
     this.mixer = mixer;
     this.flightLevel = flightLevel;
     this.deviation = 0;
