@@ -1,4 +1,12 @@
-import { Mesh, BoxBufferGeometry, Object3D, Event, Vector2, Vector3, RepeatWrapping } from 'three';
+import {
+  Mesh,
+  BoxBufferGeometry,
+  Object3D,
+  Event,
+  Vector2,
+  Vector3,
+  RepeatWrapping,
+} from 'three';
 import { Physics } from '../Physics';
 import { loadModel } from '../systems/model';
 import { loadMeshStandardMaterial } from '../systems/texture';
@@ -9,8 +17,8 @@ export class Floor extends Entity {
   constructor(
     object: Object3D<Event>,
     rigidBodyDesc: RigidBodyDesc,
-    colliderDesc: ColliderDesc,
-    physics: Physics,
+    colliderDesc: ColliderDesc[],
+    physics: Physics
   ) {
     super('floor', [object], rigidBodyDesc, colliderDesc, false, physics);
   }
@@ -34,7 +42,7 @@ export class Floor extends Entity {
         position.y,
         position.z
       ),
-      ColliderDesc.cuboid(size.x, size.y, size.z),
+      [ColliderDesc.cuboid(size.x, size.y, size.z)],
       physics
     );
   }

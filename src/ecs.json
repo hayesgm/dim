@@ -1,0 +1,26 @@
+{
+  "level": {
+    "scene": {
+      "vr": true,
+      "camera": {
+        "type": "perspective",
+        "position": [1,2,3],
+        "target": "puppy"
+      },
+      "objects": {
+        "puppy": {
+          "entity": "puppy",
+          "location": [5,6,7]
+        }
+      }
+    }
+  },
+  "puppy": {
+    "model": "assets/models/Puppy/scene.gltf",
+    "animated": true,
+    "ai": "puppy.wasm"
+  },
+  "token": {
+    "model": "assets/models/Puppy/bucket.gltf",
+  }
+}

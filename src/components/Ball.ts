@@ -12,7 +12,7 @@ export class Ball extends Entity {
   constructor(
     object: Object3D<Event>,
     rigidBodyDesc: RigidBodyDesc,
-    colliderDesc: ColliderDesc,
+    colliderDesc: ColliderDesc[],
     physics: Physics
   ) {
     super('ball', [object], rigidBodyDesc, colliderDesc, false, physics);
@@ -27,10 +27,12 @@ export class Ball extends Entity {
         .setCcdEnabled(true)
         .setLinearDamping(0.5)
         .setAngularDamping(1.0),
-      ColliderDesc.ball(size * 0.5)
-        .setDensity(0.5)
-        .setRestitution(0.7)
-        .setRestitutionCombineRule(CoefficientCombineRule.Max),
+      [
+        ColliderDesc.ball(size * 0.5)
+          .setDensity(0.5)
+          .setRestitution(0.7)
+          .setRestitutionCombineRule(CoefficientCombineRule.Max),
+      ],
       physics
     );
   }

@@ -19,8 +19,8 @@ export class Bird extends Entity {
     mixer: AnimationMixer,
     flightLevel: number,
     rigidBodyDesc: RigidBodyDesc,
-    colliderDesc: ColliderDesc,
-    physics: Physics,
+    colliderDesc: ColliderDesc[],
+    physics: Physics
   ) {
     super(id, [object], rigidBodyDesc, colliderDesc, false, physics);
     this.mixer = mixer;
@@ -29,7 +29,7 @@ export class Bird extends Entity {
   }
 
   static async load(model: string, position: Vector3, physics: Physics) {
-    let {model: object, mixer} = await loadAnimatedModel(
+    let { model: object, mixer } = await loadAnimatedModel(
       `assets/models/${model}.glb`,
       { scale: 0.002 }
     );
@@ -43,7 +43,7 @@ export class Bird extends Entity {
         position.y,
         position.z
       ),
-      ColliderDesc.cuboid(0.1, 0.1, 0.1).setDensity(2.0),
+      [ColliderDesc.cuboid(0.1, 0.1, 0.1).setDensity(2.0)],
       physics
     );
   }

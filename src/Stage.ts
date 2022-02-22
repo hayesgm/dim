@@ -1,7 +1,9 @@
 import {
   Object3D,
   Event,
+  Euler,
   Group,
+  MathUtils,
   PerspectiveCamera,
   Ray,
   Scene,
@@ -24,8 +26,8 @@ import { getRose } from './systems/rose';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
 import { Panel } from './components/Panel';
-import { Ball } from './components/Ball';
-import { Bird } from './components/Bird';
+import { Basketball } from './components/Basketball';
+import { Hoop } from './components/Hoop';
 import { Floor } from './components/Floor';
 import { Puppy } from './components/Puppy';
 import { Physics } from './Physics';
@@ -82,9 +84,9 @@ export class Stage {
     let targets: Object3D<Event>[] = [];
     let targeted = false;
 
-    let ball = await Ball.load(0.07, new Vector3(0.75, 0, -0.5), this.physics);
+    let ball = await Basketball.load(0.18, new Vector3(0.75, 0, -0.5), this.physics);
     let entities = await Promise.all([
-      Bird.load('Parrot', new Vector3(0, 0, 0.25), this.physics),
+      Hoop.load(2.0, new Vector3(0, 2.5, -1), new Euler(MathUtils.degToRad(10), MathUtils.degToRad(0), MathUtils.degToRad(10), 'XYZ'), this.physics),
       ball,
       new VRController(
         'lcontroller',
@@ -104,14 +106,11 @@ export class Stage {
         this.physics,
         this
       ),
-      Bird.load('Flamingo', new Vector3(0.75, 0, -1), this.physics),
-      Bird.load('Stork', new Vector3(0, -0.25, -1), this.physics),
       Floor.load(
         new Vector3(50, 0.0001, 50),
         new Vector3(0, -0.5, 0),
         this.physics
       ),
-      Puppy.load(ball, new Vector3(0.25, 0, -0.5), this.physics),
     ]);
     for (let entity of entities) {
       if (entity) {
@@ -178,14 +177,14 @@ export class Stage {
     } else if (event === 'selectstart' && id === 'lcontroller') {
       this.physics.toggleColliders();
     } else if (event === 'squeezestart' && id === 'rcontroller') {
-      let ball = this.entities.get('ball')!;
+      let ball = this.entities.get('basketball')!;
       let rcontroller = this.entities.get('rcontroller')!;
       console.log({ ball, rcontroller });
       if (ball) {
         ball.track(rcontroller);
       }
     } else if (event === 'squeezeend' && id === 'rcontroller') {
-      let ball = this.entities.get('ball')!;
+      let ball = this.entities.get('basketball')!;
       let rcontroller = this.entities.get('rcontroller')! as VRController;
       if (ball) {
         let velocity = rcontroller.getAverageVelocity().multiplyScalar(1.3);

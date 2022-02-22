@@ -1,4 +1,4 @@
-import { Box3, Group, Object3D, Event, Vector2, Vector3 } from 'three';
+import { Box3, Group, Object3D, Event, Vector2, Vector3, SkeletonHelper, Quaternion } from 'three';
 import { MathUtils } from 'three';
 import { getColliderObject } from './systems/colliderObject';
 import { Panel } from './components/Panel';
@@ -18,7 +18,7 @@ export class Entity {
   objects: Object3D<Event>[];
   colliderObject: Object3D<Event>;
   rigidBodyDesc: RigidBodyDesc;
-  colliderDesc: ColliderDesc;
+  colliderDesc: ColliderDesc[];
   rigidBody: RigidBody;
   collider: Collider;
   debugging: boolean;
@@ -26,12 +26,13 @@ export class Entity {
   debugPanel: Panel;
   initialBoundingBox: Box3;
   animated: boolean;
+  skeleton?: SkeletonHelper;
 
   constructor(
     id: string,
     objects: Object3D<Event>[],
     rigidBodyDesc: RigidBodyDesc,
-    colliderDesc: ColliderDesc,
+    colliderDesc: ColliderDesc[],
     animated: boolean,
     physics: Physics,
   ) {
@@ -43,6 +44,7 @@ export class Entity {
     for (let object of objects) {
       this.group.add(object);
     }
+
     let initialBoundingBox = new Box3();
     initialBoundingBox.setFromObject(this.group, true);
     this.initialBoundingBox = initialBoundingBox;
@@ -62,6 +64,12 @@ export class Entity {
     this.animated = animated;
   }
 
+  generateSkeleton() {
+    this.group.updateMatrixWorld(true);
+    this.skeleton = new SkeletonHelper(this.group);
+    console.log(this.skeleton);
+  }
+
   debug(message: string) {
     this.debugPanel.appendText(message);
   }
@@ -78,6 +86,15 @@ export class Entity {
     console.log("Entity stored in 'entity' var...");
     (window as any).entity = this;
     this.showCollider(this.debugging);
+    this.showSkeleton(this.debugging);
+  }
+
+  showSkeleton(show: boolean = true) {
+    if (!this.skeleton) {
+      this.generateSkeleton();
+    }
+    this.group.remove(this.group.children[0]);
+    this.group.add(this.skeleton!);
   }
 
   showCollider(show: boolean = true) {
@@ -95,6 +112,11 @@ export class Entity {
     return new Vector3(transaction.x, transaction.y, transaction.z);
   }
 
+  rotation(): Quaternion {
+    let rotation = this.rigidBody.rotation();
+    return new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
+  }
+
   track(entity: Entity | null) {
     this.trackEntity = entity;
   }
@@ -105,7 +127,7 @@ export class Entity {
       this.rigidBody.setTranslation(this.trackEntity.position(), false);
     }
 
-    if (this.animated) {
+    if (false) {
       let boundingBox = new Box3();
       boundingBox.setFromObject(this.group, true);
 
@@ -120,8 +142,9 @@ export class Entity {
       this.colliderObject.position.set(translation.x, translation.y, translation.z);
     }
 
-    let position = this.position();
-    this.group.position.set(position.x, position.y, position.z);
+    this.group.position.copy(this.position());
+    this.group.rotation.setFromQuaternion(this.rotation());
+
   }
 
   sceneObjects(): Object3D<Event>[] {

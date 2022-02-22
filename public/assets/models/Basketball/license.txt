@@ -1,0 +1,8 @@
+Model Information:
+* title:	Basketball NBA Spalding PBR
+* source:	https://sketchfab.com/3d-models/basketball-nba-spalding-pbr-3dce6852e65745ea9c5a76352bc4d287
+* author:	romullus (https://sketchfab.com/romullus)
+
+Model License:
+* license type:	SKETCHFAB Editorial (https://sketchfab.com/licenses)
+* requirements:	Use only in connection with events that are newsworthy or of public interest

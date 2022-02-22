@@ -1,10 +1,18 @@
-import { AnimationClip, AnimationMixer, Object3D, Event, Vector3, Quaternion } from 'three';
+import {
+  AnimationClip,
+  AnimationMixer,
+  Object3D,
+  Event,
+  Vector3,
+  Quaternion,
+} from 'three';
 import { Physics } from '../Physics';
 import { loadAnimatedModel } from '../systems/model';
 import {
   RigidBodyDesc,
   ColliderDesc,
   CoefficientCombineRule,
+  Vector,
 } from '@dimforge/rapier3d-compat';
 import { Entity } from '../Entity';
 import { Ball } from './Ball';
@@ -13,6 +21,10 @@ export type Action =
   | { action: 'run'; direction: Vector3 }
   | { action: 'walk'; direction: Vector3 }
   | 'idle';
+
+function toVector3(v: Vector): Vector3 {
+  return new Vector3(v.x, v.y, v.z);
+}
 
 export class Puppy extends Entity {
   ball: Ball;
@@ -31,7 +43,7 @@ export class Puppy extends Entity {
     mixer: AnimationMixer,
     flightLevel: number,
     rigidBodyDesc: RigidBodyDesc,
-    colliderDesc: ColliderDesc,
+    colliderDesc: ColliderDesc[],
     physics: Physics
   ) {
     super(id, [object], rigidBodyDesc, colliderDesc, true, physics);
@@ -45,7 +57,7 @@ export class Puppy extends Entity {
   }
 
   static async load(ball: Ball, position: Vector3, physics: Physics) {
-    let {model, animations, mixer} = await loadAnimatedModel(
+    let { model, animations, mixer } = await loadAnimatedModel(
       `assets/models/Puppy/scene.gltf`,
       { scale: 0.008, animation: 15 }
     );
@@ -61,9 +73,11 @@ export class Puppy extends Entity {
         position.y,
         position.z
       ),
-      ColliderDesc.cuboid(0.15, 0.25, 0.3)
-        .setTranslation(0, 0.15, 0)
-        .setDensity(2.0),
+      [
+        ColliderDesc.cuboid(0.15, 0.25, 0.3)
+          .setTranslation(0, 0.15, 0)
+          .setDensity(1.0),
+      ],
       physics
     );
   }
@@ -82,10 +96,18 @@ export class Puppy extends Entity {
     this.fadeInAnimation(animation);
     let mass = this.rigidBody?.mass();
     let velocity = this.getVelocity(desire);
-    if (velocity.length() > 0) {
-      //console.log({velocity, l: velocity.length()});
-      this.rigidBody?.applyImpulse(velocity.multiplyScalar(1 / mass), true);
-      // TODO: Turn puppy
+    if (this.rigidBody && velocity.length() > 0) {
+      let linvel = toVector3(this.rigidBody.linvel());
+      let diff = velocity.sub(linvel);
+      diff.y = 0; // Don't move in y direction
+      if (diff.length() > 0.001) {
+        let final = diff.multiplyScalar(mass);
+
+        //console.log({velocity, l: velocity.length()});
+        // console.log(linvel, final);
+        this.rigidBody.applyImpulse(final, true);
+        // TODO: Turn puppy
+      }
     }
   }
 
@@ -112,6 +134,7 @@ export class Puppy extends Entity {
   }
 
   getAnimation(action: Action): string {
+    return 'Arm_Dog|Idle_2';
     if (action === 'idle') {
       return 'Arm_Dog|Idle_2';
     } else if (action.action === 'run') {
@@ -138,17 +161,17 @@ export class Puppy extends Entity {
     if (this.currentClip === clipName) {
       return;
     }
-    console.log("Fading into " + clipName);
+    console.log('Fading into ' + clipName);
     this.currentClip = clipName;
     let clip = this.animations.find((animation) => animation.name === clipName);
     if (!clip) {
-      throw new Error("Could not find clip: " + clipName);
+      throw new Error('Could not find clip: ' + clipName);
     }
     const action = this.mixer.clipAction(clip);
     action.fadeIn(1);
     let puppy = this;
-    this.mixer.addEventListener('loop', function(e) {
-      // puppy.rigidCcolliderObject.position.set(translation.x, translation.y, translation.z);      
+    this.mixer.addEventListener('loop', function (e) {
+      // puppy.rigidCcolliderObject.position.set(translation.x, translation.y, translation.z);
     });
   }
 }
