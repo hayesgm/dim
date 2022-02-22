@@ -2,6 +2,7 @@ import { Vector2, Vector3 } from 'three';
 import type * as Rapier from '@dimforge/rapier3d';
 import { Entity } from './Entity';
 import {
+  EventQueue,
   World,
   Ray,
   RigidBody,
@@ -79,7 +80,25 @@ export class Physics {
 
   tick(delta: number) {
     this.world.timestep = delta;
-    this.world.step();
+    let eventQueue = new EventQueue(true);
+    this.world.step(eventQueue);
+    eventQueue.drainIntersectionEvents((handle1, handle2, intersecting) => {
+      let entityUUID1 = this.colliderIndex.get(handle1);
+      if (entityUUID1) {
+        let entity1 = this.entities.get(entityUUID1);
+        if (entity1) {
+          entity1.entity.handleCollision(handle1, handle2, intersecting);
+        }
+      }
+
+      let entityUUID2 = this.colliderIndex.get(handle1);
+      if (entityUUID2) {
+        let entity2 = this.entities.get(entityUUID2);
+        if (entity2) {
+          entity2.entity.handleCollision(handle1, handle2, intersecting);
+        }
+      }
+    });
   }
 
   toggleColliders() {

@@ -157,4 +157,6 @@ export class Entity {
       this.group
     ];
   }
+
+  handleCollision(handle1: number, handle2: number, intersecting: boolean) {}
 }

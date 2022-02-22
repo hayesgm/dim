@@ -46,6 +46,7 @@ export class Stage {
   private rose: Object3D;
   private debugPanel: Panel;
   private entities: Map<string, Entity>;
+  points: number;
 
   constructor(container: Element) {
     this.container = container;
@@ -66,6 +67,7 @@ export class Stage {
     this.rose = getRose();
     this.rose.visible = false;
     this.entities = new Map();
+    this.points = 0;
     container.appendChild(VRButton.createButton(this.renderer));
 
     const resizer = new Resizer(container, this.camera, this.renderer);
@@ -85,7 +87,7 @@ export class Stage {
 
     let ball = await Basketball.load(0.18, new Vector3(0.75, 0, -0.5), this.physics);
     let entities = await Promise.all([
-      Hoop.load(2.5, new Vector3(0, 2.5, -1), new Euler(MathUtils.degToRad(0), MathUtils.degToRad(180), MathUtils.degToRad(0), 'XYZ'), this.physics),
+      Hoop.load(2.5, new Vector3(0, 2.5, -1), new Euler(MathUtils.degToRad(0), MathUtils.degToRad(180), MathUtils.degToRad(0), 'XYZ'), this.physics, this),
       ball,
       new VRController(
         'lcontroller',
@@ -168,7 +170,6 @@ export class Stage {
   }
 
   handleTrigger({ id, event, orientation }: TriggerEvent) {
-    this.debug("id: " + id + ", event: " + event);
     if (event === 'squeezestart' && id === 'lcontroller') {
       this.toggleDebugPanel();
     } else if (event === 'selectstart' && id === 'lcontroller') {
@@ -185,7 +186,7 @@ export class Stage {
       let rcontroller = this.entities.get('rcontroller')! as VRController;
       if (ball) {
         let velocity = rcontroller.getAverageVelocity().multiplyScalar(1.3);
-        this.debug(`Velocity+: x=${velocity.x.toFixed(3)},y=${velocity.y.toFixed(3)},z=${velocity.z.toFixed(3)}`);
+        // this.debug(`Velocity+: x=${velocity.x.toFixed(3)},y=${velocity.y.toFixed(3)},z=${velocity.z.toFixed(3)}`);
         ball.rigidBody.setTranslation(rcontroller.position(), false);
         ball.rigidBody.setLinvel(velocity, true);
         ball.track(null);

@@ -36,7 +36,7 @@ export class Panel {
     this.lines = [];
     this.maxLines = maxLines;
     this.canvas = document.createElement('canvas')!;
-    document.body.appendChild(this.canvas);
+    // document.body.appendChild(this.canvas);
     this.size = size;
     this.fontSize = 30;
     this.canvasWidth = this.canvas.width = 1000;

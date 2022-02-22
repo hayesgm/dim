@@ -15,6 +15,7 @@ import {
   CoefficientCombineRule,
 } from '@dimforge/rapier3d-compat';
 import { Entity } from '../Entity';
+import { Stage } from '../Stage';
 
 function getRotation(x: number, y: number, z: number, order='XYZ'): Quaternion {
   let q = new Quaternion();
@@ -24,20 +25,27 @@ function getRotation(x: number, y: number, z: number, order='XYZ'): Quaternion {
 }
 
 export class Hoop extends Entity {
+  stage: Stage;
+  intersectingTop: boolean;
+
   constructor(
     object: Object3D<Event>,
     rigidBodyDesc: RigidBodyDesc,
     colliderDescs: ColliderDesc[],
-    physics: Physics
+    physics: Physics,
+    stage: Stage,
   ) {
     super('hoop', [object], rigidBodyDesc, colliderDescs, false, physics);
+    this.stage = stage;
+    this.intersectingTop = false;
   }
 
   static async load(
     size: number,
     position: Vector3,
     rotation: Euler,
-    physics: Physics
+    physics: Physics,
+    stage: Stage,
   ) {
     let object = await loadModel(`assets/models/Hoop/scene.gltf`, { size });
     let q = new Quaternion();
@@ -49,8 +57,7 @@ export class Hoop extends Entity {
       let angle = i * 2 * Math.PI / segmentCount;
       let pX = Math.sin(angle) * rimRadius;
       let pZ = Math.cos(angle) * rimRadius;
-      console.log({angle, pX, pZ})
-      return ColliderDesc.ball(size * 0.003, size * 0.003, size * 0.003)
+      return ColliderDesc.ball(size * 0.003)
           .setRestitution(1.5)
           .setRestitutionCombineRule(CoefficientCombineRule.Max)
           .setTranslation(size * (0 + pX), size * 0.695, size * ( -0.38 - rimRadius + pZ ));
@@ -65,6 +72,14 @@ export class Hoop extends Entity {
         .setLinearDamping(0.5)
         .setAngularDamping(1.0),
       [
+        // Uppper Rim Sensor
+        ColliderDesc.ball(size * 0.03)
+          .setTranslation(size * 0, size * 0.735, size * (-0.38 - rimRadius ))
+          .setSensor(true),
+        // Lower Rim Sensor
+        ColliderDesc.ball(size * 0.03)
+          .setTranslation(size * 0, size * 0.635, size * (-0.38 - rimRadius ))
+          .setSensor(true),
         // Base
         ColliderDesc.cuboid(size * 0.25, size * 0.2, size * 0.25)
           .setDensity(10)
@@ -106,11 +121,35 @@ export class Hoop extends Entity {
           .setTranslation(size * 0, size * 0.78, size * -0.35),
         ...rimCollider
       ],
-      physics
+      physics,
+      stage
     );
   }
 
   tick(delta: number) {
     super.tick(delta);
+  }
+
+  handleCollision(handle1: number, handle2: number, intersecting: boolean) {
+    let upperRimSensor = this.colliders[0].handle;
+    let lowerRimSensor = this.colliders[1].handle;
+    // TODO: Check other handle is ball
+
+    this.stage.debug(`handle1: ${handle1}, handle2: ${handle2}, intersecting: ${intersecting}`);
+
+    if (intersecting && (handle1 === upperRimSensor || handle2 === upperRimSensor)) {
+      this.intersectingTop = true;
+      this.stage.debug("Intersecting...");
+    }
+
+    if (intersecting && (handle1 === lowerRimSensor || handle2 === lowerRimSensor)) {
+      if (this.intersectingTop) {
+        this.stage.points += 2;
+        this.stage.debug(`Bucket! Points: ${this.stage.points}`);
+      } else {
+        this.stage.debug(`No shooting low`);
+      }
+      this.intersectingTop = false;
+    }
   }
 }
