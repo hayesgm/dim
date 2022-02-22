@@ -88,10 +88,8 @@ export class Physics {
     this.world.step(eventQueue);
     eventQueue.drainIntersectionEvents((handle1, handle2, intersecting) => {
       let entityUUID1 = this.colliderIndex.get(handle1);
-      console.log("entityUUID1", entityUUID1);
       if (entityUUID1) {
         let entity1 = this.entities.get(entityUUID1);
-        console.log("entity1", entity1);
         if (entity1) {
           entity1.entity.handleCollision(handle1, handle2, intersecting);
         }
@@ -99,15 +97,12 @@ export class Physics {
 
       let entityUUID2 = this.colliderIndex.get(handle2);
       if (entityUUID2) {
-        console.log("entityUUID2", entityUUID2);
         let entity2 = this.entities.get(entityUUID2);
         if (entity2) {
-          console.log("entity2", entity2);
-          console.log("entity2e", entity2.entity.handleCollision.toString());
           entity2.entity.handleCollision(handle1, handle2, intersecting);
         }
       }
-      this.stage.debug(`handle1: ${handle1}, handle2: ${handle2}, intersecting: ${intersecting}, entityUUID1: ${entityUUID1}, entityUUID2: ${entityUUID2}`);
+      // this.stage.debug(`handle1: ${handle1}, handle2: ${handle2}, intersecting: ${intersecting}, entityUUID1: ${entityUUID1}, entityUUID2: ${entityUUID2}`);
     });
   }
 

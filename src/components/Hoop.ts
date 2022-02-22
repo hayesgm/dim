@@ -134,14 +134,14 @@ export class Hoop extends Entity {
   }
 
   handleCollision(handle1: number, handle2: number, intersecting: boolean) {
-    this.stage.debug(`hoop: ${this.id}, handle1: ${handle1}, handle2: ${handle2}, intersecting: ${intersecting}`);
+    // this.stage.debug(`hoop: ${this.id}, handle1: ${handle1}, handle2: ${handle2}, intersecting: ${intersecting}`);
     let upperRimSensor = this.colliders[0].handle;
     let lowerRimSensor = this.colliders[1].handle;
     // TODO: Check other handle is ball
 
     if (intersecting && (handle1 === upperRimSensor || handle2 === upperRimSensor)) {
       this.intersectingTop = true;
-      this.stage.debug("Intersecting top...");
+      // this.stage.debug("Intersecting top...");
     }
 
     if (intersecting && (handle1 === lowerRimSensor || handle2 === lowerRimSensor)) {
@@ -149,7 +149,7 @@ export class Hoop extends Entity {
         this.stage.points += 2;
         this.stage.debug(`Bucket! Points: ${this.stage.points}`);
       } else {
-        this.stage.debug(`No shooting low`);
+        // this.stage.debug(`No shooting low`);
       }
       this.intersectingTop = false;
     }
