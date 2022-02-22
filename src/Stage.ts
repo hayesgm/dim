@@ -72,9 +72,9 @@ export class Stage {
 
     const resizer = new Resizer(container, this.camera, this.renderer);
 
-    // this.renderer.domElement.addEventListener('click', (event) =>
-    //   this.handlePointer(container, event.clientX, event.clientY)
-    // );
+    this.renderer.domElement.addEventListener('click', (event) =>
+      this.handlePointer(container, event.clientX, event.clientY)
+    );
 
     window.addEventListener('keypress', (event) =>
       this.handleKeycode(event.code)
