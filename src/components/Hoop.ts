@@ -3,6 +3,7 @@ import {
   Object3D,
   Euler,
   Event,
+  MathUtils,
   Quaternion,
   Vector3,
 } from 'three';
@@ -14,6 +15,13 @@ import {
   CoefficientCombineRule,
 } from '@dimforge/rapier3d-compat';
 import { Entity } from '../Entity';
+
+function getRotation(x: number, y: number, z: number, order='XYZ'): Quaternion {
+  let q = new Quaternion();
+  let euler = new Euler(MathUtils.degToRad(x), MathUtils.degToRad(y), MathUtils.degToRad(z), order)
+  q.setFromEuler(euler);
+  return q;
+}
 
 export class Hoop extends Entity {
   constructor(
@@ -57,21 +65,45 @@ export class Hoop extends Entity {
         .setLinearDamping(0.5)
         .setAngularDamping(1.0),
       [
-        ColliderDesc.cuboid(size * 0.5, size * 0.5, size * 0.05)
-          .setDensity(3)
-          .setRestitution(1.5)
-          .setRestitutionCombineRule(CoefficientCombineRule.Min)
-          .setTranslation(size * 0, size * 0.5, size * 0),
-        ColliderDesc.cuboid(size * 0.42, size * 0.25, size * 0.03)
-          .setDensity(3)
-          .setRestitution(1.5)
-          .setRestitutionCombineRule(CoefficientCombineRule.Min)
-          .setTranslation(size * 0, size * 0.78, size * -0.35),
+        // Base
         ColliderDesc.cuboid(size * 0.25, size * 0.2, size * 0.25)
           .setDensity(10)
           .setRestitution(1.5)
           .setRestitutionCombineRule(CoefficientCombineRule.Min)
           .setTranslation(size * 0, size * 0.125, size * 0.25),
+        // Spine Base
+        ColliderDesc.cuboid(size * 0.1, size * 0.4, size * 0.05)
+          .setDensity(3)
+          .setRestitution(1.5)
+          .setRestitutionCombineRule(CoefficientCombineRule.Min)
+          .setTranslation(size * 0, size * 0.4, size * 0.23),
+        // Spine Turn
+        ColliderDesc.cuboid(size * 0.02, size * 0.25, size * 0.04)
+          .setDensity(3)
+          .setRestitution(1.5)
+          .setRestitutionCombineRule(CoefficientCombineRule.Min)
+          .setTranslation(size * 0, size * 0.6, size * 0.23)
+          .setRotation(getRotation(0, 0, 48)),
+        // Spine Top
+        ColliderDesc.cuboid(size * 0.02, size * 0.25, size * 0.04)
+          .setDensity(3)
+          .setRestitution(1.5)
+          .setRestitutionCombineRule(CoefficientCombineRule.Min)
+          .setTranslation(size * 0, size * 0.68, size * 0)
+          .setRotation(getRotation(0, 0, 90)),
+        // Spine Connector
+        ColliderDesc.cuboid(size * 0.03, size * 0.25, size * 0.04)
+          .setDensity(3)
+          .setRestitution(1.5)
+          .setRestitutionCombineRule(CoefficientCombineRule.Min)
+          .setTranslation(size * 0, size * 0.68, size * -0.2)
+          .setRotation(getRotation(0, 0, 90)),
+        // Backboard
+        ColliderDesc.cuboid(size * 0.42, size * 0.25, size * 0.03)
+          .setDensity(3)
+          .setRestitution(1.5)
+          .setRestitutionCombineRule(CoefficientCombineRule.Min)
+          .setTranslation(size * 0, size * 0.78, size * -0.35),
         ...rimCollider
       ],
       physics

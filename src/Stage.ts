@@ -85,7 +85,7 @@ export class Stage {
 
     let ball = await Basketball.load(0.18, new Vector3(0.75, 0, -0.5), this.physics);
     let entities = await Promise.all([
-      Hoop.load(2.0, new Vector3(0, 2.5, -1), new Euler(MathUtils.degToRad(0), MathUtils.degToRad(180), MathUtils.degToRad(0), 'XYZ'), this.physics),
+      Hoop.load(2.5, new Vector3(0, 2.5, -1), new Euler(MathUtils.degToRad(0), MathUtils.degToRad(180), MathUtils.degToRad(0), 'XYZ'), this.physics),
       ball,
       new VRController(
         'lcontroller',
@@ -106,7 +106,7 @@ export class Stage {
         this
       ),
       Floor.load(
-        new Vector3(50, 0.0001, 50),
+        new Vector3(20, 0.001, 20),
         new Vector3(0, -0.5, 0),
         this.physics
       ),

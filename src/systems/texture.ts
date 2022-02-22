@@ -20,9 +20,10 @@ interface TextureOpts {
   wrapS?: number,
   wrapT?: number,
   repeat?: Vector2,
+  rotation?: number,
 }
 
-type Ext = 'mr' | 'ue';
+type Ext = 'mr' | 'ue' | 'acg';
 
 function getExtPaths(base: string, ext: Ext): PathSet {
   if (ext === 'mr') {
@@ -40,6 +41,14 @@ function getExtPaths(base: string, ext: Ext): PathSet {
       normal: `${base}-normal1-dx.png`,
       roughness: `${base}-rough.png`,
       ao: `${base}-ao.png`,
+    }
+  } else if (ext === 'acg') {
+    return {
+      color: `${base}_Color.jpg`,
+      displacement: `${base}_Displacement.jpg`,
+      normal: `${base}_NormalDX.jpg`,
+      roughness: `${base}_Roughness.png`,
+      ao: `${base}_NormalGL.png`,
     }
   } else {
     throw new Error(`Unknown Ext type: ${ext}`);
@@ -70,6 +79,9 @@ export async function loadTexture(
   if (textureOpts.repeat) {
     textures.forEach((texture) => texture.repeat = textureOpts.repeat!);
   }
+  if (textureOpts.rotation) {
+    textures.forEach((texture) => texture.rotation = textureOpts.rotation!);
+  }
 
   let [color, displacement, normal, roughness, ao] = textures;
   return { color, displacement, normal, roughness, ao };
@@ -85,7 +97,7 @@ export async function loadMeshStandardMaterial(
   // TODO: envMap?
   return new MeshStandardMaterial({
     map: color,
-    // displacementMap: displacement, // TODO: This maybe needs to be scaled
+    //displacementMap: displacement, // TODO: This maybe needs to be scaled
     normalMap: normal,
     roughnessMap: roughness,
     aoMap: ao,
