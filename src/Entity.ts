@@ -27,6 +27,7 @@ export class Entity {
   initialBoundingBox: Box3;
   animated: boolean;
   skeleton?: SkeletonHelper;
+  jointLocation?: Vector3;
 
   constructor(
     id: string,

@@ -6,6 +6,7 @@ import {
   MathUtils,
   PerspectiveCamera,
   Ray,
+  Quaternion,
   Scene,
   Vector2,
   Vector3,
@@ -27,12 +28,16 @@ import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 
 import { Panel } from './components/Panel';
 import { Basketball } from './components/Basketball';
-import { Hoop } from './components/Hoop';
+import { Hoop, Rim } from './components/Hoop';
 import { Floor } from './components/Floor';
 import { Puppy } from './components/Puppy';
 import { Physics } from './Physics';
 import { Entity } from './Entity';
 import { buildNumber } from './systems/build';
+
+import {
+  JointData
+} from '@dimforge/rapier3d-compat';
 
 export class Stage {
   private container: Element;
@@ -86,7 +91,7 @@ export class Stage {
     let targets: Object3D<Event>[] = [];
 
     let ball = await Basketball.load(0.18, new Vector3(0.75, 0, -0.5), this.physics);
-    let entities = await Promise.all([
+    let entities = (await Promise.all([
       Hoop.load(2.5, new Vector3(0, 2.5, -1), new Euler(MathUtils.degToRad(0), MathUtils.degToRad(180), MathUtils.degToRad(0), 'XYZ'), this.physics, this),
       ball,
       new VRController(
@@ -112,18 +117,31 @@ export class Stage {
         new Vector3(0, -0.5, 0),
         this.physics
       ),
-    ]);
+    ])).flat();
     for (let entity of entities) {
       if (entity) {
         this.entities.set(entity.id, entity);
         this.loop.updatables.push(entity);
-        console.log(entity.id, entity.sceneObjects());
+        console.log(entity.id, entity.sceneObjects(), entity.position(), entity.group);
         let sceneObjects: Object3D<Event>[] = entity.sceneObjects();
         for (let sceneObject of sceneObjects) {
           this.scene.add(sceneObject);
         }
       }
     }
+
+    let k = { x: 1.0, y: 0.0, z: 0.0 };
+    let hoop = this.entities.get('hoop')!;
+    let rim = this.entities.get('rim')!;
+    let rotation = new Quaternion();
+    rotation.setFromEuler(new Euler(1.0, 0, 0));
+
+    let params = JointData.revolute(
+      { x: 0, y: 0, z: 0 },
+      { x: 0, y: 0, z: 0 },
+      { x: 1.0, y: 0, z: 0 }
+    );
+    let joint = this.physics.world.createImpulseJoint(params, hoop.rigidBody, rim.rigidBody);
 
     this.controls.target.copy(this.entities.get('basketball')!.position());
 
