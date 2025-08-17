@@ -39,6 +39,20 @@ import {
   JointData
 } from '@dimforge/rapier3d-compat';
 
+async function writeFile(data: Uint8Array) {
+  // create a new handle
+  const newHandle = await (<any>window).showSaveFilePicker();
+
+  // create a FileSystemWritableFileStream to write to
+  const writableStream = await newHandle.createWritable();
+
+  // write our file
+  await writableStream.write(data);
+
+  // close the file and write the contents to disk.
+  await writableStream.close();
+}
+
 export class Stage {
   private container: Element;
   private cameraGroup: Group;
@@ -92,7 +106,7 @@ export class Stage {
 
     let ball = await Basketball.load(0.18, new Vector3(0.75, 0, -0.5), this.physics);
     let entities = (await Promise.all([
-      Hoop.load(2.5, new Vector3(0, 2.5, -1), new Euler(MathUtils.degToRad(0), MathUtils.degToRad(180), MathUtils.degToRad(0), 'XYZ'), this.physics, this),
+      Hoop.load(2.5, new Vector3(0, 0, -1), new Euler(MathUtils.degToRad(0), MathUtils.degToRad(180), MathUtils.degToRad(0), 'XYZ'), this.physics, this),
       ball,
       new VRController(
         'lcontroller',
@@ -137,8 +151,8 @@ export class Stage {
     rotation.setFromEuler(new Euler(1.0, 0, 0));
 
     let params = JointData.revolute(
-      { x: 0, y: 0, z: 0 },
-      { x: 0, y: 0, z: 0 },
+      hoop.jointLocation!,
+      rim.jointLocation!,
       { x: 1.0, y: 0, z: 0 }
     );
     let joint = this.physics.world.createImpulseJoint(params, hoop.rigidBody, rim.rigidBody);
@@ -246,6 +260,9 @@ export class Stage {
         this.toggleDebugPanel();
       case 'KeyC':
         this.physics.toggleColliders();
+      case 'KeyS':
+        let snapshot = this.physics.lastSnapshot ?? this.physics.world.takeSnapshot();
+        writeFile(snapshot);
       default:
         break;
     }

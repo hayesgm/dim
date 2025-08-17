@@ -25,6 +25,7 @@ export class Physics {
   colliderIndex: Map<number, string>;
   lastStep: number;
   collidersShowing: boolean;
+  lastSnapshot?: Uint8Array;
   stage: Stage;
 
   constructor(stage: Stage) {
@@ -85,6 +86,7 @@ export class Physics {
   tick(delta: number) {
     this.world.timestep = delta;
     let eventQueue = new EventQueue(true);
+    this.lastSnapshot = this.world.takeSnapshot();
     this.world.step(eventQueue);
     eventQueue.drainIntersectionEvents((handle1, handle2, intersecting) => {
       let entityUUID1 = this.colliderIndex.get(handle1);

@@ -120,94 +120,95 @@ export class Hoop extends Entity {
         .setCollisionGroups(0)
         .setTranslation(
           size * (0 + pX),
-          size * 0.695,
-          size * (-0.38 - rimRadius + pZ)
+          0,
+          size * (-rimRadius + pZ)
         );
     });
 
+    let rimOffset = new Vector3(0, size * -0.13, size * -0.01);
+    let rimPosition = new Vector3(position.x + rimOffset.x, position.y + rimOffset.y, position.z + rimOffset.z);
+    let jointPosition = new Vector3(rimPosition.x, rimPosition.y + size * 0.83, rimPosition.z + size * 0.415);
+    let rimColliderTranslation = new Vector3(size * 0, size * 0, -size * rimRadius);
+    let rimColliderOffsetY = size * 0.1;
+    let rimLocation = new Vector3(jointPosition.x, jointPosition.y, jointPosition.z + 5);
+    console.log("Joint Position", jointPosition.x, jointPosition.y, jointPosition.z);
+    console.log("Collider Position", (size * 0) - jointPosition.x, (size * 0.78) - jointPosition.y, (size * 0.01) - jointPosition.z);
     let hoop = new Hoop(
       hoopModel,
       RigidBodyDesc.newDynamic()
-        .setTranslation(position.x, position.y, position.z)
-        .setRotation(q)
-        .setCcdEnabled(true)
-        .setLinearDamping(0.5)
-        .setAngularDamping(1.0),
+        .setTranslation(jointPosition.x, jointPosition.y, jointPosition.z),
       [
-        ColliderDesc.cuboid(size * 0.25, size * 0.2, size * 0.25)
-          .setDensity(10)
-          .setRestitution(1.5)
-          .setRestitutionCombineRule(CoefficientCombineRule.Min)
-          .setTranslation(size * 0, size * 0.125, size * 0.25),
-        // Spine Base
-        ColliderDesc.cuboid(size * 0.1, size * 0.4, size * 0.05)
-          .setDensity(3)
-          .setRestitution(1.5)
-          .setRestitutionCombineRule(CoefficientCombineRule.Min)
-          .setTranslation(size * 0, size * 0.4, size * 0.23),
-        // Spine Turn
-        ColliderDesc.cuboid(size * 0.02, size * 0.25, size * 0.04)
-          .setDensity(3)
-          .setRestitution(1.5)
-          .setRestitutionCombineRule(CoefficientCombineRule.Min)
-          .setTranslation(size * 0, size * 0.6, size * 0.23)
-          .setRotation(getRotation(0, 0, 48)),
-        // Spine Top
-        ColliderDesc.cuboid(size * 0.02, size * 0.25, size * 0.04)
-          .setDensity(3)
-          .setRestitution(1.5)
-          .setRestitutionCombineRule(CoefficientCombineRule.Min)
-          .setTranslation(size * 0, size * 0.68, size * 0)
-          .setRotation(getRotation(0, 0, 90)),
-        // Spine Connector
-        ColliderDesc.cuboid(size * 0.03, size * 0.25, size * 0.04)
-          .setDensity(3)
-          .setRestitution(1.5)
-          .setRestitutionCombineRule(CoefficientCombineRule.Min)
-          .setTranslation(size * 0, size * 0.68, size * -0.2)
-          .setRotation(getRotation(0, 0, 90)),
+        // Base
+        // ColliderDesc.cuboid(size * 0.25, size * 0.2, size * 0.25)
+        //   .setDensity(10)
+        //   .setRestitution(1.5)
+        //   .setRestitutionCombineRule(CoefficientCombineRule.Min)
+        //   .setTranslation(size * 0, size * 0.125, size * 0.25),
+        // // Spine Base
+        // ColliderDesc.cuboid(size * 0.1, size * 0.4, size * 0.05)
+        //   .setDensity(3)
+        //   .setRestitution(1.5)
+        //   .setRestitutionCombineRule(CoefficientCombineRule.Min)
+        //   .setTranslation(size * 0, size * 0.4, size * 0.23),
+        // // Spine Turn
+        // ColliderDesc.cuboid(size * 0.02, size * 0.25, size * 0.04)
+        //   .setDensity(3)
+        //   .setRestitution(1.5)
+        //   .setRestitutionCombineRule(CoefficientCombineRule.Min)
+        //   .setTranslation(size * 0, size * 0.6, size * 0.23)
+        //   .setRotation(getRotation(0, 0, 48)),
+        // // Spine Top
+        // ColliderDesc.cuboid(size * 0.02, size * 0.25, size * 0.04)
+        //   .setDensity(3)
+        //   .setRestitution(1.5)
+        //   .setRestitutionCombineRule(CoefficientCombineRule.Min)
+        //   .setTranslation(size * 0, size * 0.68, size * 0)
+        //   .setRotation(getRotation(0, 0, 90)),
+        // // Spine Connector
+        // ColliderDesc.cuboid(size * 0.03, size * 0.25, size * 0.04)
+        //   .setDensity(3)
+        //   .setRestitution(1.5)
+        //   .setRestitutionCombineRule(CoefficientCombineRule.Min)
+        //   .setTranslation(size * 0, size * 0.68, size * -0.2)
+        //   .setRotation(getRotation(0, 0, 90)),
         // Backboard
         ColliderDesc.cuboid(size * 0.42, size * 0.25, size * 0.03)
-          .setDensity(3)
-          .setRestitution(1.5)
-          .setRestitutionCombineRule(CoefficientCombineRule.Min)
-          .setTranslation(size * 0, size * 0.78, size * -0.35),
+          .setTranslation((size * 0) - jointPosition.x, (size * 0.78) - jointPosition.y, (size * 0.01) - jointPosition.z),
+        // ColliderDesc.ball(size * 0.04)
+        //   .setTranslation(0, 0, 0)
+        //   .setActiveEvents(0)
+        //   .setSensor(true),
       ],
       physics,
       stage
     );
-
-    let rimOffset = new Vector3(0, size * -1.13, size * -0.01);
-    let rimPosition = new Vector3(position.x + rimOffset.x, position.y + rimOffset.y, position.z + rimOffset.z);
-    let rimColliderTranslation = new Vector3(size * 0, size * 0.695, size * -0.38);
-    let rimColliderOffsetY = size * 1;
 
     let rim = new Rim(
       rimModel,
-      RigidBodyDesc.newStatic()
-        .setTranslation(rimPosition.x, rimPosition.y, rimPosition.z)
-        .setRotation(q)
-        .setCcdEnabled(true)
-        .setLinearDamping(0.5)
-        .setAngularDamping(1.0),
+      RigidBodyDesc.newDynamic()
+        .setTranslation(rimLocation.x, rimLocation.y, rimLocation.z),
       [
         // Uppper Rim Sensor
-        ColliderDesc.ball(size * 0.03)
-          .setTranslation(rimColliderTranslation.x, rimColliderTranslation.y + rimColliderOffsetY / 2, rimColliderTranslation.z - size * rimRadius)
-          .setActiveEvents(ActiveEvents.INTERSECTION_EVENTS)
-          .setSensor(true),
-        // Lower Rim Sensor
-        ColliderDesc.ball(size * 0.03)
-          .setTranslation(rimColliderTranslation.x, rimColliderTranslation.y - rimColliderOffsetY / 2, rimColliderTranslation.z - size * rimRadius)
-          .setActiveEvents(ActiveEvents.INTERSECTION_EVENTS)
-          .setSensor(true),
-        ...rimCollider,
+        // ColliderDesc.ball(size * 0.03)
+        //   .setTranslation(rimColliderTranslation.x, rimColliderTranslation.y + rimColliderOffsetY / 2, rimColliderTranslation.z)
+        //   .setActiveEvents(ActiveEvents.INTERSECTION_EVENTS)
+        //   .setSensor(true),
+        // // Lower Rim Sensor
+        // ColliderDesc.ball(size * 0.03)
+        //   .setTranslation(rimColliderTranslation.x, rimColliderTranslation.y - rimColliderOffsetY / 2, rimColliderTranslation.z)
+        //   .setActiveEvents(ActiveEvents.INTERSECTION_EVENTS)
+        //   .setSensor(true),
+        // ColliderDesc.ball(size * 0.04)
+        //   .setTranslation(0, 0, 0)
+        //   .setActiveEvents(0)
+        //   .setSensor(true),
+        //...rimCollider,
       ],
       physics,
       stage
     );
-    hoop.jointLocation = rimOffset;
-    rim.jointLocation = rimColliderTranslation;
+    hoop.jointLocation = jointPosition;
+    rim.jointLocation = rimPosition;
 
     return [hoop, rim];
   }
